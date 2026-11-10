@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de apagar incendio</title>
+    <script src="juego.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body id="body">
+    <section id="jugador">
+        <div id="vida">
+            <p>Vida:</p>
+            <span id="barra_de_vida"></span>
+        </div>
+        <div id="quemados">
+            <p>Quemados:</p>
+            <span id="cuadrado_quemados">0</span>
+        </div>
+        <div id="restantes">
+            <p>Restantes:</p>
+            <span id="cuadrado_restantes">0</span>
+        </div>
+    </section>
+    <main id="principal"></main>
+    <section id="inventario">
+        <div id="hueco1" class="slot">
+            <span class="numero">1</span>
+        </div>
+        <div id="hueco2" class="slot">
+            <span class="numero">2</span>
+        </div>
+        <div id="hueco3" class="slot">
+            <span class="numero">3</span>
+        </div>
+        <div id="hueco4" class="slot">
+            <span class="numero">4</span>
+        </div>
+        <div id="hueco5" class="slot">
+            <span class="numero">5</span>
+        </div>
+    </section>
+    <script>
+        const MAIN = document.getElementById("principal");
+        const TAMAÑO = 20;
+        const ELEMENTOS = construir_tablero(TAMAÑO);
+        const TABLERO = ELEMENTOS[0];
+        MAIN.appendChild(TABLERO);
+        var partida = ELEMENTOS[1]; 
+    </script>
+</body>
+</html>
