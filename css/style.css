@@ -5,9 +5,9 @@
 }
 
 #body {
-    --lado: min(100vw, 73dvh);
+    --lado: min(100vw, 73vh);
     width: var(--lado);
-    height: 100dvh;
+    height: 100vh;
     margin: 0 auto;
     background: linear-gradient(rgba(255, 255, 255, 0.464), rgba(0, 128, 0, 0.53)), url(../img/fondowebp.webp);
     background-position: center;
@@ -22,7 +22,7 @@
 }
 
 #jugador {
-    flex: 0 0 12dvh;
+    flex: 0 0 12vh;
     background: linear-gradient(rgba(56, 224, 47, 0.663), rgba(19, 83, 8, 0.647));
     display: flex;
     gap: 10px;
@@ -45,7 +45,7 @@
 }
 
 #vida, #quemados, #restantes {
-    text-shadow: 1px 1px 1px rgb(3, 3, 3);
+    text-shadow: 2px 2px 2px rgba(3, 3, 3, 0.797);
 }
 
 #barra_de_vida {
@@ -110,14 +110,13 @@
     box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.57);
     display: grid;
     place-items: center;
-    font-size: calc(var(--lado) * 0.035);
+    font-size: calc(var(--lado) * 0.04);
 }
 
 .casilla {
     display: grid;
     place-items: center;
     overflow: hidden;
-    font-size: calc(var(--lado) / 20 * 0.6);
 }
 
 .casilla1 {
@@ -139,7 +138,7 @@
 
 #contenedor_principal {
     width: 100%;
-    height: 100%;
+    aspect-ratio: 1 / 1;
     background: linear-gradient(white, rgb(34, 148, 34), rgb(4, 73, 4));
     display: grid;
     grid-template-columns: repeat(20, minmax(0, 1fr));
@@ -147,7 +146,7 @@
 }
 
 #inventario {
-    flex: 0 0 15dvh;
+    flex: 0 0 15vh;
     min-height: 0;
     padding: 5px;
     background: linear-gradient(rgb(125, 124, 124), rgba(195, 191, 191, 0.468));
@@ -182,6 +181,7 @@
     position: absolute;
     top: 10px;
     left: 10px;
+    font-size: calc(var(--lado * 0.04));
     text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.721);
 }
 
