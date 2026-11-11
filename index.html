@@ -52,7 +52,9 @@
         const PROTA = "0";
         const FUEGO = "x";
         const PISTOLA = "1";
+        const BALA = "o";
         const TAMAÑO = 20;
+        const MITAD = (TAMAÑO / 2) - 1;
         var pos_fuego_inicio;
 
         //CONSTANTES HTML
@@ -77,6 +79,9 @@
         }
         var inventario = {};
         var equipado = "";
+        var numero_bala = 0;
+        var vida = 3;
+
         
 
         //Variables de movimiento

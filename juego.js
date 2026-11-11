@@ -51,8 +51,6 @@ function cargar() {
 
         switch (casilla.textContent) {
             case PROTA:
-                casilla.dataset.array = num_array;
-                casilla.dataset.posicion = num_posicion;
                 casilla.id = "protagonista";
                 break;
             case FUEGO:
@@ -60,6 +58,7 @@ function cargar() {
                 break;
             case PISTOLA:
                 casilla.id = "pistola";
+                break;
         }
         num_posicion++;
     }
@@ -68,7 +67,6 @@ function cargar() {
 //Funcion que inserta al jugador en mitad del tablero
 
 function insertar_jugador() {
-    const MITAD = (TAMAÑO / 2) - 1;
     partida[MITAD].splice(MITAD, 1, PROTA);
     return MITAD;
 }
@@ -81,14 +79,14 @@ function insertar_fuego() {
     partida[EJE_Y].splice(EJE_X, 1, FUEGO);
     pos_fuego_inicio = [EJE_X, EJE_Y];
     CASILLAS_QUEMADAS.textContent = 1;
-    CASILLAS_RESTANTES.textContent = casillas_restantes;
+    CASILLAS_RESTANTES.textContent = casillas_restantes - 1;
 }
 
 //Función que inserta la pistola de agua 
 
 function insertar_pistola() {
     const array_random = Math.round(Math.random() * (TAMAÑO - 1));
-    const posicion_random = Math.round(Math.random() * (TAMAÑO / 2 - 1));
+    const posicion_random = Math.round(Math.random() * (MITAD - 1));
     if (partida[array_random][posicion_random] == TEXTO) {
         partida[array_random][posicion_random] = PISTOLA;
     } else {
@@ -153,6 +151,7 @@ function verdelante(ejex, ejey) {
 
 
 function mover() {
+    protagonista = document.getElementById("protagonista");
     protagonista.removeAttribute("id");
     protagonista.style.removeProperty("transform");
     partida[player_array].splice(player_position, 1, texto_pisado);
@@ -255,9 +254,24 @@ document.addEventListener('keydown', (event) => {
 
 document.addEventListener('click', () => {
     if (equipado == "pistola") {
-        alert("Hola")
+        const PRINCIPAL = document.getElementById("protagonista");
+        const ARRAY_ACTUAL = PRINCIPAL.dataset.ejey;
+        const POSICION_ACTUAL = PRINCIPAL.dataset.ejex;
+        var tempo = 1;
+        switch (direccion) {
+            case 'norte':
+                const NUEVO_ARRAY_N = ARRAY_ACTUAL - 1;
+                partida[NUEVO_ARRAY_N][POSICION_ACTUAL] = BALA;
+                const ELEMENTO = document.querySelector(`[data-ejex="${POSICION_ACTUAL}"][data-ejey="${NUEVO_ARRAY_N}"]`);
+
+                tempo++;
+                break;
+        }
     }
 });
+
+
+//Funcion encargada de mover la bala
 
 
 //Función encargada de esparcir el incendio
@@ -271,6 +285,27 @@ function esparcir_fuego(ejex, ejey) {
                 }
                 const ELEMENTO = document.querySelector(`[data-ejex="${ejex + x}"][data-ejey="${ejey + y}"]`);
                 if (ELEMENTO && !ELEMENTO.dataset.visto) {
+                    if (ELEMENTO.textContent == PROTA) {
+                        partida[ejey + y].splice(ejex + x, 1, FUEGO);
+                        ELEMENTO.removeAttribute("id");
+                        ELEMENTO.style.removeProperty("transform");
+                        direccion = 'norte';
+                        if (casillas_quemadas >= 170) {
+                            partida[TAMAÑO - 1][0] = PROTA;
+                            player_array = TAMAÑO - 1;
+                            player_position = 0;
+                            
+                        } else {
+                            partida[MITAD][MITAD] = PROTA;
+                            player_array = MITAD;
+                            player_position = MITAD;
+                        }
+                    }
+                    if(ELEMENTO.textContent == PISTOLA) {
+                        ELEMENTO.textContent = TEXTO;
+                        ELEMENTO.removeAttribute("id");
+                        insertar_pistola();
+                    }
                     ELEMENTO.dataset.visto = "visto";
                     ELEMENTO.textContent = FUEGO;
                     partida[ejey + y][ejex + x] = FUEGO;
@@ -283,7 +318,7 @@ function esparcir_fuego(ejex, ejey) {
             }
         }
         cargar();
-    }, 5000);
+    }, 2000);
 }
 
 

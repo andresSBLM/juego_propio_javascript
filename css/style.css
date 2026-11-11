@@ -18,7 +18,7 @@ html {
     flex-direction: column;
     box-shadow: 4px 4px 4px rgba(12, 60, 1, 0.674),
                 -4px 4px 4px rgba(20, 62, 2, 0.673);
-    user-select: none;
+    /*user-select: none;*/
 }
 
 #jugador {
@@ -200,4 +200,24 @@ html {
 #inventario .equipado {
     background-color: rgb(250, 247, 247);
     flex: 2 1 auto;
+}
+
+#inventario .equipado span {
+    color: black;
+    text-shadow: 2px 2px 2px grey;
+}
+
+.bala1 {
+    background-color: aqua;
+    color: transparent;
+}
+
+.bala2 {
+    background-color: azure;
+    color: transparent;
+}
+
+.bala3 {
+    background-color: bisque;
+    color: transparent;
 }
