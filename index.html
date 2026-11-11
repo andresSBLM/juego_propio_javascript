@@ -41,17 +41,63 @@
         </div>
     </section>
     <script>
-        const MAIN = document.getElementById("principal");
+
+        //CONSTANTES GLOBALES
+        const TEXTO = "*";
+        const PROTA = "0";
         const TAMAÑO = 20;
-        const ELEMENTOS = construir_tablero(TAMAÑO);
+
+        //CONSTANTES HTML
+        const MAIN = document.getElementById("principal");
+        
+        //VARIABLES PRINCIPALES
+        const ELEMENTOS = construir_tablero();
         const TABLERO = ELEMENTOS[0];
         MAIN.appendChild(TABLERO);
         var partida = ELEMENTOS[1]; 
-        console.log(partida);
-
-        insertar_jugador(TAMAÑO, partida);
-        cargar(partida, TAMAÑO, MAIN);
+        const CASILLAS = document.getElementsByClassName("casilla");
+        var protagonista;
         
+
+        //Variables de movimiento
+        var direccion = 'norte';
+        var grados_rotacion = {'norte': 180, 'este': 90, 'sur':0, 'oeste':-90}
+        var player_array;
+        var player_position;
+
+
+        //APLICACIÓN DE FUNCIONES
+        player_array = insertar_jugador();
+        player_position = player_array;
+        cargar();
+        protagonista = document.getElementById("protagonista");
+        verdireccion();
+        
+        document.addEventListener('keydown', (event) => {
+            switch(event.key) {
+                case 'ArrowUp': 
+                    direccion = 'norte';
+                    console.log("Moviendo hacia " + direccion)
+                    mover();
+                    break;
+                case 'ArrowDown':
+                    direccion = 'sur';
+                    console.log("Moviendo hacia " + direccion)
+                    mover();
+                    break;
+                case 'ArrowLeft':
+                    direccion = 'este';
+                    console.log("Moviendo hacia " + direccion)
+                    mover();
+                    break;
+                case 'ArrowRight':
+                    direccion = 'oeste';
+                    console.log("Moviendo hacia " + direccion)
+                    mover();
+                    break;
+            }
+        });
+
     </script>
 </body>
 </html>

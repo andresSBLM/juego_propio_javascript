@@ -1,5 +1,7 @@
 * {
     box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
 html {
@@ -8,7 +10,8 @@ html {
 
 #body {
     margin: auto;
-    max-width: 1000px;
+    max-width: 50%;
+    min-width: 400px;
     height: 100vh;
     background-color: white;
     display: flex;
@@ -18,7 +21,7 @@ html {
 }
 
 #jugador {
-    flex: 0 1 80px;
+    flex: 0 1 20%;
     background: linear-gradient(rgba(56, 224, 47, 0.663), rgba(19, 83, 8, 0.647));
     display: flex;
     gap: 15px;
@@ -32,11 +35,12 @@ html {
     align-items: center;
     padding: 5px;
     gap: 5px;
+    flex: 2 1 auto;
 }
 
 #vida p , #quemados p, #restantes p{
     margin: 0;
-    font-size: 2rem;
+    font-size: 1rem;
 }
 
 #vida, #quemados, #restantes {
@@ -45,8 +49,8 @@ html {
 
 #barra_de_vida{
     align-self: center;
-    width: 200px;
-    height: 30px;
+    width: 100%;
+    height: 30%;
     background-color: red;
     border-radius: 10px;
     margin-top: 5px;
@@ -59,17 +63,20 @@ html {
     font-family: cursive;
     color: yellow;
     align-items: center;
+    flex: 1 1 auto;
 }
 
 #cuadrado_quemados {
-    border-radius: 1px;
-    width: 50px;
-    height: 50px;
+    border-radius: 3px;
+    width: 20%;
+    height: 50%;
     background: linear-gradient(red, orange, yellow, white);
     box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.57);
+    font-size: 1rem;
+    text-align: center;
     display: grid;
     place-items: center;
-    font-size: 2rem;
+    
 }
 
 #restantes {
@@ -78,22 +85,24 @@ html {
     color: rgb(92, 240, 19);
     align-items: center;
     gap: 5px;
+    flex: 1 1 auto;
 }
 
 #cuadrado_restantes {
-    border-radius: 1px;
-    width: 50px;
-    height: 50px;
+    border-radius: 3px;
+    width: 20%;
+    height: 50%;
     background: linear-gradient(rgb(16, 109, 5), rgb(22, 198, 10), rgb(135, 246, 8), rgb(218, 248, 119));
     box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.57);
     display: grid;
     place-items: center;
-    font-size: 2rem;
+    font-size: 1rem;
 }
 
 
 
-#casilla {
+
+.casilla {
     box-shadow: inset 1px 1px 2px white,
                 inset -1px -1px 2px green;
     display: grid;
@@ -130,7 +139,7 @@ html {
 #inventario {
     padding-top: 5px;
     padding-bottom: 5px;
-    flex: 0 1 80px;
+    flex: 0 1 20%;
     background: linear-gradient(rgb(125, 124, 124), rgba(195, 191, 191, 0.468));
     display: flex;
     gap: 5px;
@@ -157,9 +166,10 @@ html {
     text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.721);
 }
 
-#principal .personaje {
+#principal #protagonista {
     background: linear-gradient(rgba(255, 255, 255, 0.055), rgba(0, 0, 0, 0.096)), url(../img/prota.png);
     background-position: center;
     background-repeat: no-repeat;
     background-size: contain;
+    box-shadow: none;
 }
