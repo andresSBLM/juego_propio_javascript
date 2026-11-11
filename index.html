@@ -26,18 +26,23 @@
     <section id="inventario">
         <div id="hueco1" class="slot">
             <span class="numero">1</span>
+            <img class="foto"></img>
         </div>
         <div id="hueco2" class="slot">
             <span class="numero">2</span>
+           <img class="foto"></img>
         </div>
         <div id="hueco3" class="slot">
             <span class="numero">3</span>
+            <img class="foto"></img>
         </div>
         <div id="hueco4" class="slot">
             <span class="numero">4</span>
+            <img class="foto"></img>
         </div>
         <div id="hueco5" class="slot">
             <span class="numero">5</span>
+            <img class="foto"></img>
         </div>
     </section>
     <script>
@@ -45,11 +50,18 @@
         //CONSTANTES GLOBALES
         const TEXTO = "*";
         const PROTA = "0";
+        const FUEGO = "x";
+        const PISTOLA = "1";
         const TAMAÑO = 20;
+        var pos_fuego_inicio;
 
         //CONSTANTES HTML
         const MAIN = document.getElementById("principal");
-        
+        const CASILLAS_QUEMADAS = document.getElementById("cuadrado_quemados");
+        const CASILLAS_RESTANTES = document.getElementById("cuadrado_restantes")
+        const FOTOS_INVENTARIO = document.getElementsByClassName("foto");
+        const SLOTS_INVENTARIO = document.getElementsByClassName("slot");
+
         //VARIABLES PRINCIPALES
         const ELEMENTOS = construir_tablero();
         const TABLERO = ELEMENTOS[0];
@@ -57,6 +69,14 @@
         var partida = ELEMENTOS[1]; 
         const CASILLAS = document.getElementsByClassName("casilla");
         var protagonista;
+        var texto_pisado = TEXTO;
+        var casillas_quemadas = 0;
+        var casillas_restantes = TAMAÑO * TAMAÑO;
+        var objetos = {
+            'pistola': '../img/pistola.avif'
+        }
+        var inventario = {};
+        var equipado = "";
         
 
         //Variables de movimiento
@@ -66,37 +86,18 @@
         var player_position;
 
 
-        //APLICACIÓN DE FUNCIONES
+        //FUNCIONES PARA EL INICIO DE LA PARTIDA
         player_array = insertar_jugador();
         player_position = player_array;
+        insertar_pistola();
+        insertar_fuego();
         cargar();
         protagonista = document.getElementById("protagonista");
         verdireccion();
-        
-        document.addEventListener('keydown', (event) => {
-            switch(event.key) {
-                case 'ArrowUp': 
-                    direccion = 'norte';
-                    console.log("Moviendo hacia " + direccion)
-                    mover();
-                    break;
-                case 'ArrowDown':
-                    direccion = 'sur';
-                    console.log("Moviendo hacia " + direccion)
-                    mover();
-                    break;
-                case 'ArrowLeft':
-                    direccion = 'este';
-                    console.log("Moviendo hacia " + direccion)
-                    mover();
-                    break;
-                case 'ArrowRight':
-                    direccion = 'oeste';
-                    console.log("Moviendo hacia " + direccion)
-                    mover();
-                    break;
-            }
-        });
+
+        //FUNCIONES CON EJECUCIÓN DE TODA LA PARTIDA
+        esparcir_fuego(pos_fuego_inicio[0], pos_fuego_inicio[1]);
+
 
     </script>
 </body>

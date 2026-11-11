@@ -14,7 +14,7 @@ function construir_tablero() {
         var array = [];
         for (let y = 0; y < TAMAÑO; y++) {
             const CASILLA = document.createElement("div");
-            (clase % 2 == 0) ?CASILLA.classList.add("casilla1"): CASILLA.classList.add("casilla2");
+            (clase % 2 == 0) ? CASILLA.classList.add("casilla1") : CASILLA.classList.add("casilla2");
             clase++;
             array.push(TEXTO);
             CASILLA.classList.add("casilla");
@@ -46,11 +46,20 @@ function cargar() {
 
         const VALOR = partida[num_array][num_posicion];
         casilla.textContent = VALOR;
+        casilla.dataset.ejex = num_posicion;
+        casilla.dataset.ejey = num_array;
 
-        if (casilla.textContent == PROTA) {
-            casilla.dataset.array = num_array;
-            casilla.dataset.posicion = num_posicion;
-            casilla.id = "protagonista";
+        switch (casilla.textContent) {
+            case PROTA:
+                casilla.dataset.array = num_array;
+                casilla.dataset.posicion = num_posicion;
+                casilla.id = "protagonista";
+                break;
+            case FUEGO:
+                casilla.classList.add("fuego");
+                break;
+            case PISTOLA:
+                casilla.id = "pistola";
         }
         num_posicion++;
     }
@@ -60,8 +69,32 @@ function cargar() {
 
 function insertar_jugador() {
     const MITAD = (TAMAÑO / 2) - 1;
-    partida[MITAD].splice(MITAD, 1, "0");
+    partida[MITAD].splice(MITAD, 1, PROTA);
     return MITAD;
+}
+
+//Función que inserta el primer incendio en el juego
+
+function insertar_fuego() {
+    const EJE_X = TAMAÑO - 1;
+    const EJE_Y = 0;
+    partida[EJE_Y].splice(EJE_X, 1, FUEGO);
+    pos_fuego_inicio = [EJE_X, EJE_Y];
+    CASILLAS_QUEMADAS.textContent = 1;
+    CASILLAS_RESTANTES.textContent = casillas_restantes;
+}
+
+//Función que inserta la pistola de agua 
+
+function insertar_pistola() {
+    const array_random = Math.round(Math.random() * (TAMAÑO - 1));
+    const posicion_random = Math.round(Math.random() * (TAMAÑO / 2 - 1));
+    if (partida[array_random][posicion_random] == TEXTO) {
+        partida[array_random][posicion_random] = PISTOLA;
+    } else {
+        insertar_pistola();
+        return;
+    }
 }
 
 //Funcion que mueve la imagen del jugador para que apunte en la direccion del movimiento
@@ -88,19 +121,47 @@ function verdireccion() {
     }
 }
 
+//Funcion encargada de comprobar y devolver que hay delante del proximo movimiento
+
+function verdelante(ejex, ejey) {
+    var avanzar = true;
+    const OBJETO = partida[ejey][ejex];
+    console.log(ejex);
+    console.log(ejey);
+    const ELEMENTO = document.querySelector(`[data-ejex="${ejex}"][data-ejey="${ejey}"]`)
+    switch (OBJETO) {
+        case FUEGO:
+            avanzar = false;
+            break;
+        case PISTOLA:
+            avanzar = false;
+            ELEMENTO.removeAttribute("id");
+            ELEMENTO.textContent = TEXTO;
+            partida[ejey][ejex] = TEXTO;
+            inventario.pistola = objetos.pistola;
+            cargar_inventario();
+            break;
+
+    }
+    if (avanzar) {
+        texto_pisado = OBJETO;
+    }
+    return avanzar;
+}
+
 //BLOQUE ENCARGADO DE LA LÓGICA DE MOVIMIENTO DEL PERSONAJE
 
 
 function mover() {
     protagonista.removeAttribute("id");
     protagonista.style.removeProperty("transform");
-    partida[player_array].splice(player_position, 1, TEXTO);
+    partida[player_array].splice(player_position, 1, texto_pisado);
 
 
     switch (direccion) {
         case 'norte':
             const NUEVO_ARRAY_N = player_array - 1;
-            if (NUEVO_ARRAY_N == -1) {
+            if (NUEVO_ARRAY_N == -1 || !(verdelante(player_position, NUEVO_ARRAY_N))) {
                 partida[player_array].splice(player_position, 1, PROTA);
                 break;
             }
@@ -109,7 +170,7 @@ function mover() {
             break;
         case 'sur':
             const NUEVO_ARRAY_S = player_array + 1;
-            if (NUEVO_ARRAY_S == TAMAÑO) {
+            if (NUEVO_ARRAY_S == TAMAÑO || !(verdelante(player_position, NUEVO_ARRAY_S))) {
                 partida[player_array].splice(player_position, 1, PROTA);
                 break;
             }
@@ -118,8 +179,7 @@ function mover() {
             break;
         case 'este':
             const NUEVA_POS_E = player_position - 1;
-            console.log(NUEVA_POS_E);
-            if (NUEVA_POS_E  == -1) {
+            if (NUEVA_POS_E == -1 || !(verdelante(NUEVA_POS_E, player_array))) {
                 partida[player_array].splice(player_position, 1, PROTA);
                 break;
             }
@@ -129,7 +189,7 @@ function mover() {
         case 'oeste':
             const NUEVA_POS_O = player_position + 1;
             console.log(NUEVA_POS_O);
-            if (NUEVA_POS_O  == TAMAÑO) {
+            if (NUEVA_POS_O == TAMAÑO || !(verdelante(NUEVA_POS_O, player_array))) {
                 partida[player_array].splice(player_position, 1, PROTA);
                 break;
             }
@@ -142,4 +202,99 @@ function mover() {
     cargar();
     protagonista = document.getElementById("protagonista");
     verdireccion();
+}
+
+document.addEventListener('keydown', (event) => {
+    switch (event.key) {
+        case 'ArrowUp':
+        case 'w':
+            direccion = 'norte';
+            console.log("Moviendo hacia " + direccion)
+            mover();
+            break;
+        case 'ArrowDown':
+        case 's':
+            direccion = 'sur';
+            console.log("Moviendo hacia " + direccion)
+            mover();
+            break;
+        case 'ArrowLeft':
+        case 'a':
+            direccion = 'este';
+            console.log("Moviendo hacia " + direccion)
+            mover();
+            break;
+        case 'ArrowRight':
+        case 'd':
+            direccion = 'oeste';
+            console.log("Moviendo hacia " + direccion)
+            mover();
+            break;
+        case '1':
+            if (Object.keys(inventario).length !== 0) {
+                if (!equipado) {
+                    SLOTS_INVENTARIO[0].classList.add("equipado");
+                    equipado = Object.keys(inventario)[0];
+                } else {
+                    if (SLOTS_INVENTARIO[0].classList.contains("equipado")){
+                        SLOTS_INVENTARIO[0].classList.remove("equipado");
+                        equipado = "";
+                    } else {
+                        alert(5);
+                        const SLOT_EQUIPADO = document.getElementsByClassName("equipado");
+                        SLOT_EQUIPADO.classList.remove("equipado");
+                        SLOTS_INVENTARIO[0].classList.add("equipado");
+                        equipado = Object.keys(inventario)[0];
+                    }
+                }
+            }
+    }
+});
+
+//Encargado de detectar cuando el arma puede dispararse
+
+document.addEventListener('click', () => {
+    if (equipado == "pistola") {
+        alert("Hola")
+    }
+});
+
+
+//Función encargada de esparcir el incendio
+
+function esparcir_fuego(ejex, ejey) {
+    setInterval(() => {
+        for (let x = -1; x <= 1; x++) {
+            for (let y = -1; y <= 1; y++) {
+                if ((x == -1 && y == -1) || (x == 1 && y == 1) || (x == -1 && y == 1) || (x == 1 && y == -1)){
+                    continue;
+                }
+                const ELEMENTO = document.querySelector(`[data-ejex="${ejex + x}"][data-ejey="${ejey + y}"]`);
+                if (ELEMENTO && !ELEMENTO.dataset.visto) {
+                    ELEMENTO.dataset.visto = "visto";
+                    ELEMENTO.textContent = FUEGO;
+                    partida[ejey + y][ejex + x] = FUEGO;
+                    casillas_quemadas++;
+                    casillas_restantes--;
+                    CASILLAS_QUEMADAS.textContent = casillas_quemadas;
+                    CASILLAS_RESTANTES.textContent = casillas_restantes;
+                    esparcir_fuego(ejex + x, ejey + y);
+                }
+            }
+        }
+        cargar();
+    }, 5000);
+}
+
+
+//Funcion encargada de gestionar el inventario
+
+function cargar_inventario(){
+    for (let x = 0; x < Object.keys(inventario).length; x++) {
+        const CLAVE = Object.keys(inventario)[x];
+        const RUTA = inventario[CLAVE];
+        const ELEMENTO = FOTOS_INVENTARIO[x];
+        ELEMENTO.classList.add("foto_objeto");
+        ELEMENTO.src = RUTA;
+    }
 }
