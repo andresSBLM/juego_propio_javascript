@@ -348,7 +348,7 @@ function comprobar_vida() {
             setTimeout(() => {
                 alert("Has perdido");
                 window.location.href = "index.html";
-            }, 500);
+            }, 1000);
             break;
     }
 }
