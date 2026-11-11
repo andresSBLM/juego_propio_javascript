@@ -5,7 +5,10 @@
 }
 
 html {
-    background: linear-gradient(white, green);
+    background: linear-gradient(rgba(255, 255, 255, 0.464), rgba(0, 128, 0, 0.53)), url(../img/fondowebp.webp);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
 }
 
 #body {
