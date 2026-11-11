@@ -130,6 +130,8 @@ function verdelante(ejex, ejey) {
     switch (OBJETO) {
         case FUEGO:
             avanzar = false;
+            vida--;
+            comprobar_vida();
             break;
         case PISTOLA:
             avanzar = false;
@@ -290,6 +292,8 @@ function esparcir_fuego(ejex, ejey) {
                         ELEMENTO.removeAttribute("id");
                         ELEMENTO.style.removeProperty("transform");
                         direccion = 'norte';
+                        vida--;
+                        comprobar_vida();
                         if (casillas_quemadas >= 170) {
                             partida[TAMAÑO - 1][0] = PROTA;
                             player_array = TAMAÑO - 1;
@@ -319,6 +323,34 @@ function esparcir_fuego(ejex, ejey) {
         }
         cargar();
     }, 2000);
+}
+
+
+//Funcion encargada de comprobar la vida 
+
+function comprobar_vida() {
+    BARRA_DE_VIDA.removeAttribute("class");
+    if (vida < 0){
+        BARRA_DE_VIDA.classList.add("barra0");
+    }
+    switch (vida) {
+        case 3:
+            BARRA_DE_VIDA.classList.add("barra3");
+            break;
+        case 2:
+            BARRA_DE_VIDA.classList.add("barra2");
+            break;
+        case 1:
+            BARRA_DE_VIDA.classList.add("barra1");
+            break;
+        case 0:
+            BARRA_DE_VIDA.classList.add("barra0");
+            setTimeout(() => {
+                alert("Has perdido");
+                window.location.href = "index.html";
+            }, 500);
+            break;
+    }
 }
 
 

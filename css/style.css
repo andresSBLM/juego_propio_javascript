@@ -54,9 +54,24 @@ html {
 #barra_de_vida{
     width: 100%;
     height: 20%;
-    background-color: red;
     border-radius: 10px;
     box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.57);
+}
+
+.barra3 {
+    background-color: red;
+}
+
+.barra2 {
+    background: linear-gradient(90deg,black 0 33%, red 33% 100%);
+}
+
+.barra1 {
+    background: linear-gradient(90deg,black 0 66%, red 66% 100%);
+}
+
+.barra0 {
+    background: black;
 }
 
 #quemados {

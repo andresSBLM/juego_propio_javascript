@@ -11,7 +11,7 @@
     <section id="jugador">
         <div id="vida">
             <p>Vida:</p>
-            <span id="barra_de_vida"></span>
+            <span id="barra_de_vida" class="barra3"></span>
         </div>
         <div id="quemados">
             <p>Quemados:</p>
@@ -63,6 +63,7 @@
         const CASILLAS_RESTANTES = document.getElementById("cuadrado_restantes")
         const FOTOS_INVENTARIO = document.getElementsByClassName("foto");
         const SLOTS_INVENTARIO = document.getElementsByClassName("slot");
+        const BARRA_DE_VIDA = document.getElementById("barra_de_vida");
 
         //VARIABLES PRINCIPALES
         const ELEMENTOS = construir_tablero();
