@@ -59,6 +59,9 @@ function cargar() {
             case PISTOLA:
                 casilla.id = "pistola";
                 break;
+            case BALA:
+                casilla.classList.add("bala1");
+                break;
         }
         num_posicion++;
     }
@@ -237,7 +240,7 @@ document.addEventListener('keydown', (event) => {
                     SLOTS_INVENTARIO[0].classList.add("equipado");
                     equipado = Object.keys(inventario)[0];
                 } else {
-                    if (SLOTS_INVENTARIO[0].classList.contains("equipado")){
+                    if (SLOTS_INVENTARIO[0].classList.contains("equipado")) {
                         SLOTS_INVENTARIO[0].classList.remove("equipado");
                         equipado = "";
                     } else {
@@ -257,16 +260,17 @@ document.addEventListener('keydown', (event) => {
 document.addEventListener('click', () => {
     if (equipado == "pistola") {
         const PRINCIPAL = document.getElementById("protagonista");
-        const ARRAY_ACTUAL = PRINCIPAL.dataset.ejey;
-        const POSICION_ACTUAL = PRINCIPAL.dataset.ejex;
-        var tempo = 1;
+        const ARRAY_ACTUAL = parseInt(PRINCIPAL.dataset.ejey);
+        const POSICION_ACTUAL = parseInt(PRINCIPAL.dataset.ejex);
         switch (direccion) {
             case 'norte':
                 const NUEVO_ARRAY_N = ARRAY_ACTUAL - 1;
                 partida[NUEVO_ARRAY_N][POSICION_ACTUAL] = BALA;
                 const ELEMENTO = document.querySelector(`[data-ejex="${POSICION_ACTUAL}"][data-ejey="${NUEVO_ARRAY_N}"]`);
-
-                tempo++;
+                ELEMENTO.id = "bala" + id_bala;
+                cargar();
+                mover_bala(id_bala, POSICION_ACTUAL, NUEVO_ARRAY_N);
+                id_bala++;
                 break;
         }
     }
@@ -275,6 +279,29 @@ document.addEventListener('click', () => {
 
 //Funcion encargada de mover la bala
 
+function mover_bala(id, ejex, ejey) {
+    var x = 0;
+    const BALA = document.getElementById("bala" + id);
+    partida[ejey].splice(ejex, 1, TEXTO);
+    BALA.removeAttribute("id");
+    BALA.classList.remove("bala1", "bala2", "bala3");
+    switch (direccion) {
+        case 'norte':
+            for (let x = 0; x < TAMAÑO; x++) {
+                setTimeout(() => {
+                    const ELEMENTO = document.querySelector(`[data-ejex="${ejex}"][data-ejey="${ejey - x}"]`);
+                    const ELEMENTO_ANTERIOR = document.querySelector(`[data-ejex="${ejex}"][data-ejey="${ejey - x + 1}"]`);
+                    if (ELEMENTO) {
+                        partida[ejey - x + 1].splice(ejex, 1, TEXTO);
+                        partida[ejey - x].splice(ejex, 1, BALA);
+                        ELEMENTO.id = "bala" + id;
+                        ELEMENTO.classList.add("bala3");
+                    }
+                }, 100 * x);
+            }
+    }
+}
+
 
 //Función encargada de esparcir el incendio
 
@@ -282,7 +309,7 @@ function esparcir_fuego(ejex, ejey) {
     setInterval(() => {
         for (let x = -1; x <= 1; x++) {
             for (let y = -1; y <= 1; y++) {
-                if ((x == -1 && y == -1) || (x == 1 && y == 1) || (x == -1 && y == 1) || (x == 1 && y == -1)){
+                if ((x == -1 && y == -1) || (x == 1 && y == 1) || (x == -1 && y == 1) || (x == 1 && y == -1)) {
                     continue;
                 }
                 const ELEMENTO = document.querySelector(`[data-ejex="${ejex + x}"][data-ejey="${ejey + y}"]`);
@@ -298,14 +325,14 @@ function esparcir_fuego(ejex, ejey) {
                             partida[TAMAÑO - 1][0] = PROTA;
                             player_array = TAMAÑO - 1;
                             player_position = 0;
-                            
+
                         } else {
                             partida[MITAD][MITAD] = PROTA;
                             player_array = MITAD;
                             player_position = MITAD;
                         }
                     }
-                    if(ELEMENTO.textContent == PISTOLA) {
+                    if (ELEMENTO.textContent == PISTOLA) {
                         ELEMENTO.textContent = TEXTO;
                         ELEMENTO.removeAttribute("id");
                         insertar_pistola();
@@ -322,7 +349,7 @@ function esparcir_fuego(ejex, ejey) {
             }
         }
         cargar();
-    }, 2000);
+    }, 10000);
 }
 
 
@@ -330,7 +357,7 @@ function esparcir_fuego(ejex, ejey) {
 
 function comprobar_vida() {
     BARRA_DE_VIDA.removeAttribute("class");
-    if (vida < 0){
+    if (vida < 0) {
         BARRA_DE_VIDA.classList.add("barra0");
     }
     switch (vida) {
@@ -356,7 +383,7 @@ function comprobar_vida() {
 
 //Funcion encargada de gestionar el inventario
 
-function cargar_inventario(){
+function cargar_inventario() {
     for (let x = 0; x < Object.keys(inventario).length; x++) {
         const CLAVE = Object.keys(inventario)[x];
         const RUTA = inventario[CLAVE];
