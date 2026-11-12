@@ -216,20 +216,27 @@
 .bala1 {
     background-color: aqua;
     color: transparent;
-    box-shadow: inset -8px 8px 8px white,
-                inset 8px -8px 8px blue;
+    box-shadow: inset 5px -5px 8px blue,
+                inset -3px 3px 8px white;
 }
 
 .bala2 {
     background-color: aqua;
     color: transparent;
-    box-shadow: inset 8px 8px 8px blue,
-                inset -8px -8px 8px white;
+    box-shadow: inset 5px 5px 8px blue,
+                inset -3px -3px 8px white;
 }
 
 .bala3 {
     background-color: aqua;
     color: transparent;
-    box-shadow: inset -8px 8px 8px blue,
-                inset 8px -8px 8px white;
+    box-shadow: inset -5px 5px 8px blue,
+                inset 3px -3px 8px white;
+}
+
+.bala4 {
+    background-color: aqua;
+    color: transparent;
+    box-shadow: inset -5px -5px 8px blue,
+                inset 3px -3px 8px white;
 }

@@ -263,17 +263,17 @@ document.addEventListener('click', () => {
         if (equipado == "pistola") {
             const PRINCIPAL = document.getElementById("protagonista");
             const ARRAY_ACTUAL = parseInt(PRINCIPAL.dataset.ejey);
-        const POSICION_ACTUAL = parseInt(PRINCIPAL.dataset.ejex);
-        switch (direccion) {
-            case 'norte':
-                const NUEVO_ARRAY_N = ARRAY_ACTUAL - 1;
-                partida[NUEVO_ARRAY_N][POSICION_ACTUAL] = BALA;
-                const ELEMENTO = document.querySelector(`[data-ejex="${POSICION_ACTUAL}"][data-ejey="${NUEVO_ARRAY_N}"]`);
-                ELEMENTO.id = "bala" + id_bala;
-                cargar();
-                mover_bala(id_bala, POSICION_ACTUAL, NUEVO_ARRAY_N);
-                id_bala++;
-                break;
+            const POSICION_ACTUAL = parseInt(PRINCIPAL.dataset.ejex);
+            switch (direccion) {
+                case 'norte':
+                    const NUEVO_ARRAY_N = ARRAY_ACTUAL - 1;
+                    partida[NUEVO_ARRAY_N][POSICION_ACTUAL] = BALA;
+                    const ELEMENTO = document.querySelector(`[data-ejex="${POSICION_ACTUAL}"][data-ejey="${NUEVO_ARRAY_N}"]`);
+                    ELEMENTO.id = "bala" + id_bala;
+                    cargar();
+                    mover_bala(id_bala, POSICION_ACTUAL, NUEVO_ARRAY_N);
+                    id_bala++;
+                    break;
             }
         }
     }
@@ -284,79 +284,128 @@ document.addEventListener('click', () => {
 
 function mover_bala(id, ejex, ejey) {
     var clase = 1;
+    var movimiento = true;
+    partida[ejey].splice(ejex, 1, TEXTO);
     switch (direccion) {
         case 'norte':
             for (let x = 0; x < TAMAÑO; x++) {
                 setTimeout(() => {
                     const EL_BALA = document.getElementById("bala" + id);
+                    if (!movimiento) {
+                        return;
+                    }
+                    if (!verdelante_bala(ejex, ejey - x, ejex, ejey - x + 1)) {
+                        movimiento = false;
+                        return;
+                    }
                     if (EL_BALA) {
-                        EL_BALA.classList.remove("bala1", "bala2", "bala3");
+                        EL_BALA.classList.remove("bala1", "bala2", "bala3", "bala4");
                         EL_BALA.removeAttribute("id");
-                        partida[ejey].splice(ejex, 1, TEXTO);
                         const ELEMENTO = document.querySelector(`[data-ejex="${ejex}"][data-ejey="${ejey - x}"]`);
-                        const ELEMENTO_ANTERIOR = document.querySelector(`[data-ejex="${ejex}"][data-ejey="${ejey - x - 1}"]`);
-                        if (ELEMENTO && ELEMENTO_ANTERIOR) {
+                        if (ELEMENTO) {
                             ELEMENTO.id = "bala" + id;
-                            if (clase == 4) {
+                            if (clase == 5) {
                                 clase = 1;
                             }
                             ELEMENTO.classList.add("bala" + clase);
-                            ELEMENTO_ANTERIOR.removeAttribute("id");
+                            partida[ejey - x].splice(ejex, 1, BALA);
+                            partida[ejey - x + 1].splice(ejex, 1, TEXTO);
                             clase++;
+                            cargar();
                         }
                     }
-                }, 100 * x);
+                }, VELOCIDAD_BALA * x);
             }
+    }
+}
+
+//Funcion encargada de ver que hay delante de la bala 
+
+function verdelante_bala(nuevo_ejex, nuevo_ejey, ejex, ejey) {
+    if (nuevo_ejex < TAMAÑO && nuevo_ejex >= 0 && nuevo_ejey < TAMAÑO && nuevo_ejey >= 0) {
+        if (partida[nuevo_ejey][nuevo_ejex] == FUEGO) {
+            const ELEMENTO = document.querySelector(`[data-ejex="${ejex}"][data-ejey="${ejey}"]`);
+            const ELEMENTO_NUEVO = document.querySelector(`[data-ejex="${nuevo_ejex}"][data-ejey="${nuevo_ejey}"]`);
+            ELEMENTO.classList.remove("bala1", "bala2", "bala3", "bala4");
+            ELEMENTO.removeAttribute("id");
+            ELEMENTO_NUEVO.classList.remove("fuego");
+            ELEMENTO_NUEVO.removeAttribute("data-visto");
+            partida[nuevo_ejey].splice(nuevo_ejex, 1, TEXTO);
+            casillas_restantes++;
+            casillas_quemadas--;
+            CASILLAS_QUEMADAS.textContent = casillas_quemadas;
+            CASILLAS_RESTANTES.textContent = casillas_restantes;
+            return false;
+        } else {
+            return true;
+        }
+    } else {
+        partida[ejey].splice(ejex, 1, TEXTO);
+        const ULTIMO_ELEMENTO = document.querySelector(`[data-ejex="${ejex}"][data-ejey="${ejey}"]`);
+        ULTIMO_ELEMENTO.removeAttribute("id");
+        ULTIMO_ELEMENTO.classList.remove("bala1", "bala2", "bala3", "bala4");
     }
 }
 
 
 //Función encargada de esparcir el incendio
 
-function esparcir_fuego(ejex, ejey) {
-    setInterval(() => {
-        for (let x = -1; x <= 1; x++) {
-            for (let y = -1; y <= 1; y++) {
-                if ((x == -1 && y == -1) || (x == 1 && y == 1) || (x == -1 && y == 1) || (x == 1 && y == -1)) {
-                    continue;
-                }
-                const ELEMENTO = document.querySelector(`[data-ejex="${ejex + x}"][data-ejey="${ejey + y}"]`);
-                if (ELEMENTO && !ELEMENTO.dataset.visto) {
-                    if (ELEMENTO.textContent == PROTA) {
-                        partida[ejey + y].splice(ejex + x, 1, FUEGO);
-                        ELEMENTO.removeAttribute("id");
-                        ELEMENTO.style.removeProperty("transform");
-                        direccion = 'norte';
-                        vida--;
-                        comprobar_vida();
-                        if (casillas_quemadas >= 170) {
-                            partida[TAMAÑO - 1][0] = PROTA;
-                            player_array = TAMAÑO - 1;
-                            player_position = 0;
+function esparcir_fuego() {
+    setTimeout(() => {
+        const ELEMENTOS = document.getElementsByClassName("fuego");
+        for (let elemento of ELEMENTOS) {
+            var ejex = parseInt(elemento.dataset.ejex);
+            var ejey = parseInt(elemento.dataset.ejey);
+            console.log("x: " + ejex + " y: " + ejey);
+            for (let x = -1; x <= 1; x++) {
+                for (let y = -1; y <= 1; y++) {
+                    if ((x == -1 && y == -1) || (x == 1 && y == 1) || (x == -1 && y == 1) || (x == 1 && y == -1)) {
+                        continue;
+                    }
+                    const ELEMENTO = document.querySelector(`[data-ejex="${ejex + x}"][data-ejey="${ejey + y}"]`);
+                    console.log(ELEMENTO);
+                    if (ELEMENTO) {
+                        if (!ELEMENTO.dataset.visto) {
 
-                        } else {
-                            partida[MITAD][MITAD] = PROTA;
-                            player_array = MITAD;
-                            player_position = MITAD;
+
+                            if (ELEMENTO.textContent == PROTA) {
+                                partida[ejey + y].splice(ejex + x, 1, FUEGO);
+                                ELEMENTO.removeAttribute("id");
+                                ELEMENTO.style.removeProperty("transform");
+                                direccion = 'norte';
+                                vida--;
+                                comprobar_vida();
+                                if (casillas_quemadas >= 170) {
+                                    partida[TAMAÑO - 1][0] = PROTA;
+                                    player_array = TAMAÑO - 1;
+                                    player_position = 0;
+
+                                } else {
+                                    partida[MITAD][MITAD] = PROTA;
+                                    player_array = MITAD;
+                                    player_position = MITAD;
+                                }
+                            }
+                            if (ELEMENTO.textContent == PISTOLA) {
+                                ELEMENTO.textContent = TEXTO;
+                                ELEMENTO.removeAttribute("id");
+                                insertar_pistola();
+                            }
+                            ELEMENTO.textContent = FUEGO;
+                            ELEMENTO.dataset.visto = "visto";
+                            partida[ejey + y][ejex + x] = FUEGO;
+                            casillas_quemadas++;
+                            casillas_restantes--;
+                            CASILLAS_QUEMADAS.textContent = casillas_quemadas;
+                            CASILLAS_RESTANTES.textContent = casillas_restantes;
                         }
                     }
-                    if (ELEMENTO.textContent == PISTOLA) {
-                        ELEMENTO.textContent = TEXTO;
-                        ELEMENTO.removeAttribute("id");
-                        insertar_pistola();
-                    }
-                    ELEMENTO.dataset.visto = "visto";
-                    ELEMENTO.textContent = FUEGO;
-                    partida[ejey + y][ejex + x] = FUEGO;
-                    casillas_quemadas++;
-                    casillas_restantes--;
-                    CASILLAS_QUEMADAS.textContent = casillas_quemadas;
-                    CASILLAS_RESTANTES.textContent = casillas_restantes;
-                    esparcir_fuego(ejex + x, ejey + y);
+
                 }
             }
         }
         cargar();
+        esparcir_fuego();
     }, 10000);
 }
 
@@ -382,7 +431,7 @@ function comprobar_vida() {
             BARRA_DE_VIDA.classList.add("barra0");
             setTimeout(() => {
                 alert("Has perdido");
-                window.location.href = "index.html";
+                window.locaaaaaaation.href = "index.html";
             }, 1000);
             break;
     }
