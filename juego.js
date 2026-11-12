@@ -59,9 +59,6 @@ function cargar() {
             case PISTOLA:
                 casilla.id = "pistola";
                 break;
-            case BALA:
-                casilla.classList.add("bala1");
-                break;
         }
         num_posicion++;
     }
@@ -127,8 +124,6 @@ function verdireccion() {
 function verdelante(ejex, ejey) {
     var avanzar = true;
     const OBJETO = partida[ejey][ejex];
-    console.log(ejex);
-    console.log(ejey);
     const ELEMENTO = document.querySelector(`[data-ejex="${ejex}"][data-ejey="${ejey}"]`)
     switch (OBJETO) {
         case FUEGO:
@@ -209,58 +204,65 @@ function mover() {
 }
 
 document.addEventListener('keydown', (event) => {
-    switch (event.key) {
-        case 'ArrowUp':
-        case 'w':
-            direccion = 'norte';
-            console.log("Moviendo hacia " + direccion)
-            mover();
-            break;
-        case 'ArrowDown':
-        case 's':
-            direccion = 'sur';
-            console.log("Moviendo hacia " + direccion)
-            mover();
-            break;
-        case 'ArrowLeft':
-        case 'a':
-            direccion = 'este';
-            console.log("Moviendo hacia " + direccion)
-            mover();
-            break;
-        case 'ArrowRight':
-        case 'd':
-            direccion = 'oeste';
-            console.log("Moviendo hacia " + direccion)
-            mover();
-            break;
-        case '1':
-            if (Object.keys(inventario).length !== 0) {
-                if (!equipado) {
-                    SLOTS_INVENTARIO[0].classList.add("equipado");
-                    equipado = Object.keys(inventario)[0];
-                } else {
-                    if (SLOTS_INVENTARIO[0].classList.contains("equipado")) {
-                        SLOTS_INVENTARIO[0].classList.remove("equipado");
-                        equipado = "";
-                    } else {
-                        alert(5);
-                        const SLOT_EQUIPADO = document.getElementsByClassName("equipado");
-                        SLOT_EQUIPADO.classList.remove("equipado");
+    if (vida > 0) {
+
+        switch (event.key) {
+            case 'ArrowUp':
+            case 'w':
+                direccion = 'norte';
+                console.log("Moviendo hacia " + direccion)
+                mover();
+                break;
+            case 'ArrowDown':
+            case 's':
+                direccion = 'sur';
+                console.log("Moviendo hacia " + direccion)
+                mover();
+                break;
+            case 'ArrowLeft':
+            case 'a':
+                direccion = 'este';
+                console.log("Moviendo hacia " + direccion)
+                mover();
+                break;
+            case 'ArrowRight':
+            case 'd':
+                direccion = 'oeste';
+                console.log("Moviendo hacia " + direccion)
+                mover();
+                break;
+            case '1':
+                if (Object.keys(inventario).length !== 0) {
+                    if (!equipado) {
                         SLOTS_INVENTARIO[0].classList.add("equipado");
                         equipado = Object.keys(inventario)[0];
+                    } else {
+                        if (SLOTS_INVENTARIO[0].classList.contains("equipado")) {
+                            SLOTS_INVENTARIO[0].classList.remove("equipado");
+                            equipado = "";
+                        } else {
+                            alert(5);
+                            const SLOT_EQUIPADO = document.getElementsByClassName("equipado");
+                            SLOT_EQUIPADO.classList.remove("equipado");
+                            SLOTS_INVENTARIO[0].classList.add("equipado");
+                            equipado = Object.keys(inventario)[0];
+                        }
                     }
                 }
-            }
+        }
     }
 });
 
 //Encargado de detectar cuando el arma puede dispararse
 
 document.addEventListener('click', () => {
-    if (equipado == "pistola") {
-        const PRINCIPAL = document.getElementById("protagonista");
-        const ARRAY_ACTUAL = parseInt(PRINCIPAL.dataset.ejey);
+    const ahora = Date.now();
+    if (ahora - ultimo_click < COOLDOWN_CLICK) return;
+    ultimo_click = ahora;
+    {
+        if (equipado == "pistola") {
+            const PRINCIPAL = document.getElementById("protagonista");
+            const ARRAY_ACTUAL = parseInt(PRINCIPAL.dataset.ejey);
         const POSICION_ACTUAL = parseInt(PRINCIPAL.dataset.ejex);
         switch (direccion) {
             case 'norte':
@@ -272,6 +274,7 @@ document.addEventListener('click', () => {
                 mover_bala(id_bala, POSICION_ACTUAL, NUEVO_ARRAY_N);
                 id_bala++;
                 break;
+            }
         }
     }
 });
@@ -280,22 +283,27 @@ document.addEventListener('click', () => {
 //Funcion encargada de mover la bala
 
 function mover_bala(id, ejex, ejey) {
-    var x = 0;
-    const BALA = document.getElementById("bala" + id);
-    partida[ejey].splice(ejex, 1, TEXTO);
-    BALA.removeAttribute("id");
-    BALA.classList.remove("bala1", "bala2", "bala3");
+    var clase = 1;
     switch (direccion) {
         case 'norte':
             for (let x = 0; x < TAMAÑO; x++) {
                 setTimeout(() => {
-                    const ELEMENTO = document.querySelector(`[data-ejex="${ejex}"][data-ejey="${ejey - x}"]`);
-                    const ELEMENTO_ANTERIOR = document.querySelector(`[data-ejex="${ejex}"][data-ejey="${ejey - x + 1}"]`);
-                    if (ELEMENTO) {
-                        partida[ejey - x + 1].splice(ejex, 1, TEXTO);
-                        partida[ejey - x].splice(ejex, 1, BALA);
-                        ELEMENTO.id = "bala" + id;
-                        ELEMENTO.classList.add("bala3");
+                    const EL_BALA = document.getElementById("bala" + id);
+                    if (EL_BALA) {
+                        EL_BALA.classList.remove("bala1", "bala2", "bala3");
+                        EL_BALA.removeAttribute("id");
+                        partida[ejey].splice(ejex, 1, TEXTO);
+                        const ELEMENTO = document.querySelector(`[data-ejex="${ejex}"][data-ejey="${ejey - x}"]`);
+                        const ELEMENTO_ANTERIOR = document.querySelector(`[data-ejex="${ejex}"][data-ejey="${ejey - x - 1}"]`);
+                        if (ELEMENTO && ELEMENTO_ANTERIOR) {
+                            ELEMENTO.id = "bala" + id;
+                            if (clase == 4) {
+                                clase = 1;
+                            }
+                            ELEMENTO.classList.add("bala" + clase);
+                            ELEMENTO_ANTERIOR.removeAttribute("id");
+                            clase++;
+                        }
                     }
                 }, 100 * x);
             }

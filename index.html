@@ -57,6 +57,9 @@
         const MITAD = (TAMAÑO / 2) - 1;
         var pos_fuego_inicio;
 
+        
+        
+
         //CONSTANTES HTML
         const MAIN = document.getElementById("principal");
         const CASILLAS_QUEMADAS = document.getElementById("cuadrado_quemados");
@@ -80,9 +83,13 @@
         }
         var inventario = {};
         var equipado = "";
-        var id_bala = 1;
+        
         var vida = 3;
 
+        //VARIABLES DE LA PISTOLA
+        const COOLDOWN_CLICK = 200;
+        var ultimo_click = 0;
+        var id_bala = 1;
         
 
         //Variables de movimiento
