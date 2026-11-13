@@ -60,6 +60,8 @@ function cargar() {
             case PISTOLA:
                 casilla.id = "pistola";
                 break;
+            case ENEMIGO:
+                casilla.classList.add("enemigo");
         }
         num_posicion++;
     }
@@ -139,6 +141,8 @@ function verdelante(ejex, ejey) {
             partida[ejey][ejex] = TEXTO;
             inventario.pistola = objetos.pistola;
             cargar_inventario();
+            insertar_fuego();
+            esparcir_fuego(pos_fuego_inicio[0], pos_fuego_inicio[1]);
             break;
 
     }
@@ -264,36 +268,53 @@ document.addEventListener('click', () => {
     const ahora = Date.now();
     if (ahora - ultimo_click < COOLDOWN_CLICK) return;
     ultimo_click = ahora;
-    {
-        if (equipado == "pistola") {
-            const PRINCIPAL = document.getElementById("protagonista");
-            const ARRAY_ACTUAL = parseInt(PRINCIPAL.dataset.ejey);
-            const POSICION_ACTUAL = parseInt(PRINCIPAL.dataset.ejex);
-            switch (direccion) {
-                case 'norte':
-                    const NUEVO_ARRAY_N = ARRAY_ACTUAL - 1;
-                    const ELEMENTO = document.querySelector(`[data-ejex="${POSICION_ACTUAL}"][data-ejey="${NUEVO_ARRAY_N}"]`);
-                    if (ELEMENTO){
-                        if (partida[NUEVO_ARRAY_N][POSICION_ACTUAL] == FUEGO) {
-                            ELEMENTO.removeAttribute("data-visto");
-                        ELEMENTO.classList.remove("fuego");
-                        casillas_quemadas--;
-                        casillas_restantes++;
-                        CASILLAS_QUEMADAS.textContent = casillas_quemadas;
-                        CASILLAS_RESTANTES.textContent = casillas_restantes;
-                        victoria();
-                    }
-                    partida[NUEVO_ARRAY_N][POSICION_ACTUAL] = BALA;
-                    ELEMENTO.id = "bala" + id_bala;
-                    cargar();
-                    mover_bala(id_bala, POSICION_ACTUAL, NUEVO_ARRAY_N);
-                    id_bala++; 
-                    break;                
-                }
-            }
-        }
+
+    if (equipado == "pistola") {
+        crear_bala();
     }
 });
+
+document.addEventListener('keydown', (event) => {
+    switch (event.key) {
+        case 'q':
+        case 'Q':
+            if (equipado == "pistola") {
+                crear_bala();
+            }
+            
+    }
+});
+
+//Funcion que crea la bala
+
+function crear_bala() {
+    const PRINCIPAL = document.getElementById("protagonista");
+    const ARRAY_ACTUAL = parseInt(PRINCIPAL.dataset.ejey);
+    const POSICION_ACTUAL = parseInt(PRINCIPAL.dataset.ejex);
+    switch (direccion) {
+        case 'norte':
+            const NUEVO_ARRAY_N = ARRAY_ACTUAL - 1;
+            const ELEMENTO = document.querySelector(`[data-ejex="${POSICION_ACTUAL}"][data-ejey="${NUEVO_ARRAY_N}"]`);
+            if (ELEMENTO) {
+                if (partida[NUEVO_ARRAY_N][POSICION_ACTUAL] == FUEGO) {
+                    ELEMENTO.removeAttribute("data-visto");
+                    ELEMENTO.classList.remove("fuego");
+                    casillas_quemadas--;
+                    casillas_restantes++;
+                    CASILLAS_QUEMADAS.textContent = casillas_quemadas;
+                    CASILLAS_RESTANTES.textContent = casillas_restantes;
+                    victoria();
+                }
+                partida[NUEVO_ARRAY_N][POSICION_ACTUAL] = BALA;
+                ELEMENTO.id = "bala" + id_bala;
+                cargar();
+                mover_bala(id_bala, POSICION_ACTUAL, NUEVO_ARRAY_N);
+                id_bala++;
+                break;
+            }
+    }
+}
+
 
 
 //Funcion encargada de mover la bala
@@ -339,9 +360,9 @@ function mover_bala(id, ejex, ejey) {
 
 function verdelante_bala(nuevo_ejex, nuevo_ejey, ejex, ejey) {
     if (nuevo_ejex < TAMAÑO && nuevo_ejex >= 0 && nuevo_ejey < TAMAÑO && nuevo_ejey >= 0) {
+        const ELEMENTO = document.querySelector(`[data-ejex="${ejex}"][data-ejey="${ejey}"]`);
+        const ELEMENTO_NUEVO = document.querySelector(`[data-ejex="${nuevo_ejex}"][data-ejey="${nuevo_ejey}"]`);
         if (partida[nuevo_ejey][nuevo_ejex] == FUEGO) {
-            const ELEMENTO = document.querySelector(`[data-ejex="${ejex}"][data-ejey="${ejey}"]`);
-            const ELEMENTO_NUEVO = document.querySelector(`[data-ejex="${nuevo_ejex}"][data-ejey="${nuevo_ejey}"]`);
             ELEMENTO.classList.remove("bala1", "bala2", "bala3", "bala4");
             ELEMENTO.removeAttribute("id");
             ELEMENTO_NUEVO.classList.remove("fuego");
@@ -353,9 +374,20 @@ function verdelante_bala(nuevo_ejex, nuevo_ejey, ejex, ejey) {
             CASILLAS_RESTANTES.textContent = casillas_restantes;
             victoria();
             return false;
+        }else if (partida[nuevo_ejey][nuevo_ejex] == ENEMIGO){
+            ELEMENTO.classList.remove("bala1", "bala2", "bala3", "bala4");
+            ELEMENTO.removeAttribute("id");
+            ELEMENTO_NUEVO.classList.remove("enemigo");
+            partida[nuevo_ejey].splice(nuevo_ejex, 1, FUEGO);
+            casillas_restantes--;
+            casillas_quemadas++;
+            CASILLAS_QUEMADAS.textContent = casillas_quemadas;
+            CASILLAS_RESTANTES.textContent = casillas_restantes;
+            generar_fuego_de_enemigo(nuevo_ejey, nuevo_ejex);
         } else {
             return true;
         }
+        cargar();
     } else {
         partida[ejey].splice(ejex, 1, TEXTO);
         const ULTIMO_ELEMENTO = document.querySelector(`[data-ejex="${ejex}"][data-ejey="${ejey}"]`);
@@ -419,13 +451,37 @@ function esparcir_fuego() {
             }
         }
         if (daño) {
-            vida--;                
+            vida--;
             comprobar_vida();
             daño = false;
         }
+        if (casillas_quemadas > 100) {
+            const FONDO = document.getElementById("body");
+            FONDO.style.background = "linear-gradient(rgba(255, 83, 83, 0.464),rgba(214, 112, 17, 0.46),rgba(231, 210, 20, 0.46)) , url(../img/fondowebp.webp)";
+            FONDO.style.backgroundPosition = "center";
+            FONDO.style.backgroundSize = "cover";
+        }
+        if (casillas_quemadas > 200) {
+            const FONDO = document.getElementById("body");
+            FONDO.style.background = "linear-gradient(rgba(212, 43, 43, 0.57),rgba(214, 112, 17, 0.62),rgba(231, 210, 20, 0.6)) , url(../img/fondowebp.webp)";
+            FONDO.style.backgroundPosition = "center";
+            FONDO.style.backgroundSize = "cover";
+        }
+        if (casillas_quemadas > 300) {
+            const FONDO = document.getElementById("body");
+            FONDO.style.background = "linear-gradient(rgba(214, 26, 26, 0.73),rgba(214, 112, 17, 0.8),rgba(231, 210, 20, 0.74)) , url(../img/fondowebp.webp)";
+            FONDO.style.backgroundPosition = "center";
+            FONDO.style.backgroundSize = "cover";
+        }
+        if (casillas_quemadas > 350) {
+            const FONDO = document.getElementById("body");
+            FONDO.style.background = "linear-gradient(rgba(248, 8, 8, 0.81),rgba(255, 123, 0, 0.81),rgba(252, 227, 1, 0.87)) , url(../img/fondowebp.webp)";
+            FONDO.style.backgroundPosition = "center";
+            FONDO.style.backgroundSize = "cover";
+        }
         cargar();
         esparcir_fuego();
-    }, 3000);
+    }, VELOCIDAD_FUEGO);
 }
 
 
@@ -478,4 +534,49 @@ function cargar_inventario() {
         ELEMENTO.classList.add("foto_objeto");
         ELEMENTO.src = RUTA;
     }
+}
+
+
+//Función encargada de avanzar el tiempo de juego 
+
+function avanzar_tiempo() {
+
+    setTimeout(() => {
+        tiempo_de_juego++;
+        avanzar_tiempo();
+        TIEMPO.textContent = tiempo_de_juego;
+        if (tiempo_de_juego % RATIO_SPAWNEO == 0) {
+            console.log("Spawneando enemigo");
+            spawnear_enemigo();
+        }
+    }, 1000);
+}
+
+//Funcion que spawnea un enemigo 
+
+function spawnear_enemigo() {
+    const EJE_X_RANDOM = Math.round(Math.random() * (TAMAÑO - 1));
+    const EJE_Y_RANDOM = Math.round(Math.random() * (TAMAÑO - 1));
+    console.log(partida[EJE_Y_RANDOM][EJE_X_RANDOM])
+    switch (partida[EJE_Y_RANDOM][EJE_X_RANDOM]) {
+        case PROTA:
+        case FUEGO:
+        case PISTOLA:
+        case ENEMIGO:
+            spawnear_enemigo();
+            break;
+        default:
+            partida[EJE_Y_RANDOM].splice(EJE_X_RANDOM, 1, ENEMIGO);
+            cargar();
+            break;
+
+    }
+}
+
+//Genera el fuego que produce un enemigo al morir
+
+function generar_fuego_de_enemigo(ejey, ejex) {
+    const ELEMENTO = document.querySelector(`[data-ejex="${ejex}"][data-ejey="${ejey}"]`);
+    ELEMENTO.classList.add("fuego");
+    ELEMENTO.dataset.visto = "visto";
 }

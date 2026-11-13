@@ -18,7 +18,7 @@
     flex-direction: column;
     box-shadow: 4px 4px 4px rgba(12, 60, 1, 0.674),
                 -4px 4px 4px rgba(20, 62, 2, 0.673);
-    user-select: none;
+    /*user-select: none; */
 }
 
 #jugador {
@@ -45,7 +45,7 @@
 }
 
 #vida, #quemados, #restantes {
-    text-shadow: 2px 2px 2px rgba(3, 3, 3, 0.797);
+    text-shadow: 1px 1px 2px rgba(3, 3, 3, 0.797);
 }
 
 #barra_de_vida {
@@ -244,4 +244,27 @@
     box-shadow: inset -5px -5px 8px rgb(7, 142, 133),
                 inset 3px -3px 8px white;
     border-radius: 50%;
+}
+
+
+#div_tiempo {
+    background-color: rgb(48, 220, 250);
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 10px;
+    text-align: center;
+    font-weight: bold;
+    border-radius: 10px;
+    box-shadow: inset 3px 3px 3px rgb(188, 241, 234),
+                inset -3px -3px 3px rgb(80, 151, 179);
+    color: rgb(37, 93, 156);
+    text-shadow: 1px 1px 2px rgb(255, 255, 255);
+}
+
+#principal .enemigo {
+    background-image:url(../img/enemigo.png);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
 }
