@@ -52,6 +52,7 @@ function cargar() {
         switch (casilla.textContent) {
             case PROTA:
                 casilla.id = "protagonista";
+                casilla.classList.remove("bala1");
                 break;
             case FUEGO:
                 casilla.classList.add("fuego");
@@ -209,24 +210,28 @@ document.addEventListener('keydown', (event) => {
         switch (event.key) {
             case 'ArrowUp':
             case 'w':
+            case 'W':
                 direccion = 'norte';
                 console.log("Moviendo hacia " + direccion)
                 mover();
                 break;
             case 'ArrowDown':
             case 's':
+            case 'S':
                 direccion = 'sur';
                 console.log("Moviendo hacia " + direccion)
                 mover();
                 break;
             case 'ArrowLeft':
             case 'a':
+            case 'A':
                 direccion = 'este';
                 console.log("Moviendo hacia " + direccion)
                 mover();
                 break;
             case 'ArrowRight':
             case 'd':
+            case 'D':
                 direccion = 'oeste';
                 console.log("Moviendo hacia " + direccion)
                 mover();
@@ -267,13 +272,24 @@ document.addEventListener('click', () => {
             switch (direccion) {
                 case 'norte':
                     const NUEVO_ARRAY_N = ARRAY_ACTUAL - 1;
-                    partida[NUEVO_ARRAY_N][POSICION_ACTUAL] = BALA;
                     const ELEMENTO = document.querySelector(`[data-ejex="${POSICION_ACTUAL}"][data-ejey="${NUEVO_ARRAY_N}"]`);
+                    if (ELEMENTO){
+                        if (partida[NUEVO_ARRAY_N][POSICION_ACTUAL] == FUEGO) {
+                            ELEMENTO.removeAttribute("data-visto");
+                        ELEMENTO.classList.remove("fuego");
+                        casillas_quemadas--;
+                        casillas_restantes++;
+                        CASILLAS_QUEMADAS.textContent = casillas_quemadas;
+                        CASILLAS_RESTANTES.textContent = casillas_restantes;
+                        victoria();
+                    }
+                    partida[NUEVO_ARRAY_N][POSICION_ACTUAL] = BALA;
                     ELEMENTO.id = "bala" + id_bala;
                     cargar();
                     mover_bala(id_bala, POSICION_ACTUAL, NUEVO_ARRAY_N);
-                    id_bala++;
-                    break;
+                    id_bala++; 
+                    break;                
+                }
             }
         }
     }
@@ -335,6 +351,7 @@ function verdelante_bala(nuevo_ejex, nuevo_ejey, ejex, ejey) {
             casillas_quemadas--;
             CASILLAS_QUEMADAS.textContent = casillas_quemadas;
             CASILLAS_RESTANTES.textContent = casillas_restantes;
+            victoria();
             return false;
         } else {
             return true;
@@ -352,29 +369,25 @@ function verdelante_bala(nuevo_ejex, nuevo_ejey, ejex, ejey) {
 
 function esparcir_fuego() {
     setTimeout(() => {
+        var daño = false;
         const ELEMENTOS = document.getElementsByClassName("fuego");
         for (let elemento of ELEMENTOS) {
             var ejex = parseInt(elemento.dataset.ejex);
             var ejey = parseInt(elemento.dataset.ejey);
-            console.log("x: " + ejex + " y: " + ejey);
             for (let x = -1; x <= 1; x++) {
                 for (let y = -1; y <= 1; y++) {
                     if ((x == -1 && y == -1) || (x == 1 && y == 1) || (x == -1 && y == 1) || (x == 1 && y == -1)) {
                         continue;
                     }
                     const ELEMENTO = document.querySelector(`[data-ejex="${ejex + x}"][data-ejey="${ejey + y}"]`);
-                    console.log(ELEMENTO);
                     if (ELEMENTO) {
                         if (!ELEMENTO.dataset.visto) {
-
-
                             if (ELEMENTO.textContent == PROTA) {
                                 partida[ejey + y].splice(ejex + x, 1, FUEGO);
                                 ELEMENTO.removeAttribute("id");
                                 ELEMENTO.style.removeProperty("transform");
                                 direccion = 'norte';
-                                vida--;
-                                comprobar_vida();
+                                daño = true;
                                 if (casillas_quemadas >= 170) {
                                     partida[TAMAÑO - 1][0] = PROTA;
                                     player_array = TAMAÑO - 1;
@@ -385,6 +398,7 @@ function esparcir_fuego() {
                                     player_array = MITAD;
                                     player_position = MITAD;
                                 }
+                                continue;
                             }
                             if (ELEMENTO.textContent == PISTOLA) {
                                 ELEMENTO.textContent = TEXTO;
@@ -404,9 +418,14 @@ function esparcir_fuego() {
                 }
             }
         }
+        if (daño) {
+            vida--;                
+            comprobar_vida();
+            daño = false;
+        }
         cargar();
         esparcir_fuego();
-    }, 10000);
+    }, 3000);
 }
 
 
@@ -431,9 +450,20 @@ function comprobar_vida() {
             BARRA_DE_VIDA.classList.add("barra0");
             setTimeout(() => {
                 alert("Has perdido");
-                window.locaaaaaaation.href = "index.html";
+                window.location.href = "index.html";
             }, 1000);
             break;
+    }
+}
+
+//Funcion encargada de gestionar la victoria
+
+function victoria() {
+    if (casillas_quemadas == 0 && casillas_restantes == (TAMAÑO * TAMAÑO)) {
+        setTimeout(() => {
+            alert("Felicidades conseguiste apagar el incendio");
+            window.location.href = "index.html";
+        }, 1000);
     }
 }
 

@@ -18,7 +18,7 @@
     flex-direction: column;
     box-shadow: 4px 4px 4px rgba(12, 60, 1, 0.674),
                 -4px 4px 4px rgba(20, 62, 2, 0.673);
-    /*user-select: none;*/
+    user-select: none;
 }
 
 #jugador {
@@ -136,6 +136,7 @@
 }
 
 #contenedor_principal {
+    background-color: rgb(105, 239, 57);
     width: 100%;
     height: 73vh;
     display: grid;
@@ -213,30 +214,34 @@
     text-shadow: 2px 2px 2px grey;
 }
 
-.bala1 {
-    background-color: aqua;
+.bala1, .bala2, .bala3, .bala4 {
     color: transparent;
-    box-shadow: inset 5px -5px 8px blue,
+    background: transparent;
+    background-color: rgb(4, 255, 247);
+}
+
+.bala1 {
+    box-shadow: inset 5px -5px 8px rgb(7, 142, 133),
                 inset -3px 3px 8px white;
+    border-radius: 50%;
 }
 
 .bala2 {
-    background-color: aqua;
-    color: transparent;
-    box-shadow: inset 5px 5px 8px blue,
+    box-shadow: inset 5px 5px 8px rgb(7, 142, 133),
                 inset -3px -3px 8px white;
+    border-radius: 50%;
 }
 
 .bala3 {
-    background-color: aqua;
     color: transparent;
-    box-shadow: inset -5px 5px 8px blue,
+    box-shadow: inset -5px 5px 8px rgb(7, 142, 133),
                 inset 3px -3px 8px white;
+    border-radius: 50%;
 }
 
 .bala4 {
-    background-color: aqua;
     color: transparent;
-    box-shadow: inset -5px -5px 8px blue,
+    box-shadow: inset -5px -5px 8px rgb(7, 142, 133),
                 inset 3px -3px 8px white;
+    border-radius: 50%;
 }
