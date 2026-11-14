@@ -74,6 +74,25 @@ function insertar_jugador() {
     return MITAD;
 }
 
+//Funcion encargada de spawnear al jugador tras morir
+
+function spawnear_jugador() {
+    const EJE_X_RANDOM = Math.round(Math.random() * (TAMAÑO - 1));
+    const EJE_Y_RANDOM = Math.round(Math.random() * (TAMAÑO - 1));
+    switch (partida[EJE_Y_RANDOM][EJE_X_RANDOM]) {
+        case FUEGO:
+        case PISTOLA:
+        case ENEMIGO:
+        case BALA:
+            spawnear_jugador();
+            break;
+        default:
+            partida[EJE_Y_RANDOM].splice(EJE_X_RANDOM, 1, PROTA);
+            player_array = EJE_Y_RANDOM;
+            player_position = EJE_X_RANDOM;
+    }
+}
+
 //Función que inserta el primer incendio en el juego
 
 function insertar_fuego() {
@@ -84,6 +103,7 @@ function insertar_fuego() {
     CASILLAS_QUEMADAS.textContent = 1;
     CASILLAS_RESTANTES.textContent = casillas_restantes - 1;
 }
+
 
 //Función que inserta la pistola de agua 
 
@@ -306,10 +326,7 @@ function crear_bala() {
                 if (partida[NUEVO_ARRAY_N][POSICION_ACTUAL] == FUEGO) {
                     ELEMENTO_N.removeAttribute("data-visto");
                     ELEMENTO_N.classList.remove("fuego");
-                    casillas_quemadas--;
-                    casillas_restantes++;
-                    CASILLAS_QUEMADAS.textContent = casillas_quemadas;
-                    CASILLAS_RESTANTES.textContent = casillas_restantes;
+                    restar_fuego();
                     victoria();
                 }
                 partida[NUEVO_ARRAY_N][POSICION_ACTUAL] = BALA;
@@ -326,10 +343,7 @@ function crear_bala() {
                 if (partida[NUEVO_ARRAY_S][POSICION_ACTUAL] == FUEGO) {
                     ELEMENTO_S.removeAttribute("data-visto");
                     ELEMENTO_S.classList.remove("fuego");
-                    casillas_quemadas--;
-                    casillas_restantes++;
-                    CASILLAS_QUEMADAS.textContent = casillas_quemadas;
-                    CASILLAS_RESTANTES.textContent = casillas_restantes;
+                    restar_fuego();
                     victoria();
                 }
                 partida[NUEVO_ARRAY_S][POSICION_ACTUAL] = BALA;
@@ -347,10 +361,7 @@ function crear_bala() {
                 if (partida[ARRAY_ACTUAL][NUEVO_ANCHO_E] == FUEGO) {
                     ELEMENTO_E.removeAttribute("data-visto");
                     ELEMENTO_E.classList.remove("fuego");
-                    casillas_quemadas--;
-                    casillas_restantes++;
-                    CASILLAS_QUEMADAS.textContent = casillas_quemadas;
-                    CASILLAS_RESTANTES.textContent = casillas_restantes;
+                    restar_fuego();
                     victoria();
                 }
                 partida[ARRAY_ACTUAL][NUEVO_ANCHO_E] = BALA;
@@ -368,10 +379,7 @@ function crear_bala() {
                 if (partida[ARRAY_ACTUAL][NUEVO_ANCHO_O] == FUEGO) {
                     ELEMENTO_O.removeAttribute("data-visto");
                     ELEMENTO_O.classList.remove("fuego");
-                    casillas_quemadas--;
-                    casillas_restantes++;
-                    CASILLAS_QUEMADAS.textContent = casillas_quemadas;
-                    CASILLAS_RESTANTES.textContent = casillas_restantes;
+                    restar_fuego();
                     victoria();
                 }
                 partida[ARRAY_ACTUAL][NUEVO_ANCHO_O] = BALA;
@@ -534,10 +542,8 @@ function verdelante_bala(nuevo_ejex, nuevo_ejey, ejex, ejey) {
             ELEMENTO_NUEVO.classList.remove("fuego");
             ELEMENTO_NUEVO.removeAttribute("data-visto");
             partida[nuevo_ejey].splice(nuevo_ejex, 1, TEXTO);
-            casillas_restantes++;
-            casillas_quemadas--;
-            CASILLAS_QUEMADAS.textContent = casillas_quemadas;
-            CASILLAS_RESTANTES.textContent = casillas_restantes;
+            partida[ejey].splice(ejex, 1, TEXTO);
+            restar_fuego();
             cambiar_fondo();
             victoria();
             return false;
@@ -547,10 +553,9 @@ function verdelante_bala(nuevo_ejex, nuevo_ejey, ejex, ejey) {
             ELEMENTO_NUEVO.classList.remove("enemigo");
             partida[nuevo_ejey].splice(nuevo_ejex, 1, FUEGO);
             partida[ejey].splice(ejex, 1, TEXTO);
-            casillas_restantes--;
-            casillas_quemadas++;
-            CASILLAS_QUEMADAS.textContent = casillas_quemadas;
-            CASILLAS_RESTANTES.textContent = casillas_restantes;
+            enemigos_derrotados++;
+            ENEMIGOS.textContent = enemigos_derrotados;
+            sumar_fuego();
             cambiar_fondo();
             generar_fuego_de_enemigo(nuevo_ejey, nuevo_ejex);
             return false;
@@ -588,18 +593,11 @@ function esparcir_fuego() {
                                 partida[ejey + y].splice(ejex + x, 1, FUEGO);
                                 ELEMENTO.removeAttribute("id");
                                 ELEMENTO.style.removeProperty("transform");
+                                ELEMENTO.dataset.visto = "visto";
                                 direccion = 'norte';
                                 daño = true;
-                                if (casillas_quemadas >= 170) {
-                                    partida[TAMAÑO - 1][0] = PROTA;
-                                    player_array = TAMAÑO - 1;
-                                    player_position = 0;
+                                spawnear_jugador();
 
-                                } else {
-                                    partida[MITAD][MITAD] = PROTA;
-                                    player_array = MITAD;
-                                    player_position = MITAD;
-                                }
                                 continue;
                             }
                             if (ELEMENTO.textContent == PISTOLA) {
@@ -610,10 +608,7 @@ function esparcir_fuego() {
                             ELEMENTO.textContent = FUEGO;
                             ELEMENTO.dataset.visto = "visto";
                             partida[ejey + y][ejex + x] = FUEGO;
-                            casillas_quemadas++;
-                            casillas_restantes--;
-                            CASILLAS_QUEMADAS.textContent = casillas_quemadas;
-                            CASILLAS_RESTANTES.textContent = casillas_restantes;
+                            sumar_fuego();
                         }
                     }
 
@@ -722,7 +717,7 @@ function avanzar_tiempo() {
         tiempo_de_juego++;
         avanzar_tiempo();
         TIEMPO.textContent = tiempo_de_juego;
-        if (tiempo_de_juego % RATIO_SPAWNEO == 0) {
+        if (tiempo_de_juego % RATIO_SPAWNEO == 0 && Object.keys(inventario).length !== 0) {
             console.log("Spawneando enemigo");
             spawnear_enemigo();
         }
@@ -756,4 +751,21 @@ function generar_fuego_de_enemigo(ejey, ejex) {
     const ELEMENTO = document.querySelector(`[data-ejex="${ejex}"][data-ejey="${ejey}"]`);
     ELEMENTO.classList.add("fuego");
     ELEMENTO.dataset.visto = "visto";
+}
+
+
+//Funciones encargadas de gestionar las cuentas de las casillas quemadas y restantes
+
+function sumar_fuego() {
+    casillas_quemadas++;
+    casillas_restantes--;
+    CASILLAS_QUEMADAS.textContent = casillas_quemadas;
+    CASILLAS_RESTANTES.textContent = casillas_restantes;
+}
+
+function restar_fuego() {
+    casillas_quemadas--;
+    casillas_restantes++;
+    CASILLAS_QUEMADAS.textContent = casillas_quemadas;
+    CASILLAS_RESTANTES.textContent = casillas_restantes;
 }

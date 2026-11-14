@@ -49,6 +49,10 @@
         <p>Tiempo: </p>
         <p id="tiempo"></p>
     </div>
+    <div id="enemigos_derrotados">
+        <img src="img/muerte.png" id="icono_muertes"></img>
+        <p id="numero_enemigos"></p>
+    </div>
     <script>
 
         //CONSTANTES GLOBALES
@@ -61,11 +65,9 @@
         const TAMAÑO = 20;
         const MITAD = (TAMAÑO / 2) - 1;
         var pos_fuego_inicio;
-        const VELOCIDAD_FUEGO = 5000;
-        const RATIO_SPAWNEO = 10;
+        const VELOCIDAD_FUEGO = 3000;
+        const RATIO_SPAWNEO = 4;
 
-        
-        
 
         //CONSTANTES HTML
         const MAIN = document.getElementById("principal");
@@ -75,6 +77,7 @@
         const SLOTS_INVENTARIO = document.getElementsByClassName("slot");
         const BARRA_DE_VIDA = document.getElementById("barra_de_vida");
         const TIEMPO = document.getElementById("tiempo");
+        const ENEMIGOS = document.getElementById("numero_enemigos");
 
         //VARIABLES PRINCIPALES
         const ELEMENTOS = construir_tablero();
@@ -93,6 +96,7 @@
         var equipado = "";
         var vida = 3;
         var tiempo_de_juego = 0;
+        var enemigos_derrotados = 0;
 
 
         //VARIABLES DE LA PISTOLA
@@ -111,6 +115,7 @@
 
         //FUNCIONES PARA EL INICIO DE LA PARTIDA
         TIEMPO.textContent = 0;
+        ENEMIGOS.textContent = enemigos_derrotados;
         player_array = insertar_jugador();
         player_position = player_array;
         insertar_pistola();

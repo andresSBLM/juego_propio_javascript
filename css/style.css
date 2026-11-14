@@ -18,7 +18,7 @@
     flex-direction: column;
     box-shadow: 4px 4px 4px rgba(12, 60, 1, 0.674),
                 -4px 4px 4px rgba(20, 62, 2, 0.673);
-    /*user-select: none; */
+    /*user-select: none;*/ 
 }
 
 #jugador {
@@ -249,6 +249,8 @@
 
 #div_tiempo {
     background-color: rgb(48, 220, 250);
+    display: flex;
+    gap: 10px;
     position: fixed;
     top: 20px;
     right: 20px;
@@ -268,3 +270,31 @@
     background-repeat: no-repeat;
     background-size: contain;
 }
+
+#enemigos_derrotados {
+    display: flex;
+    position: fixed;
+    top: 70px;
+    right: 20px;
+    background-color: rgb(114, 12, 12);
+    width: 90px;
+    padding: 10px;
+    justify-content: space-evenly;
+    border-radius: 10px;
+    box-shadow: inset 3px 3px 3px rgb(168, 4, 4),
+                inset -3px -3px 3px rgb(56, 1, 1);
+    color: white;
+    font-size: 1.25rem;
+    font-weight: bold;
+    text-shadow: 2px 2px 2px red;
+}
+
+#icono_muertes {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    filter: drop-shadow(1px 1px 3px rgb(244, 239, 239));
+    width: 20px;
+    height: 20px;
+}
+
