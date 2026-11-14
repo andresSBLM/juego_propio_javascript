@@ -18,7 +18,7 @@
     flex-direction: column;
     box-shadow: 4px 4px 4px rgba(12, 60, 1, 0.674),
                 -4px 4px 4px rgba(20, 62, 2, 0.673);
-    /*user-select: none;*/ 
+    user-select: none;
 }
 
 #jugador {

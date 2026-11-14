@@ -100,8 +100,9 @@ function insertar_fuego() {
     const EJE_Y = 0;
     partida[EJE_Y].splice(EJE_X, 1, FUEGO);
     pos_fuego_inicio = [EJE_X, EJE_Y];
-    CASILLAS_QUEMADAS.textContent = 1;
-    CASILLAS_RESTANTES.textContent = casillas_restantes - 1;
+    const ELEMENTO = document.querySelector(`[data-ejex="${EJE_X}"][data-ejey="${EJE_Y}"]`);
+    ELEMENTO.dataset.visto = "visto";
+    sumar_fuego();
 }
 
 
@@ -165,6 +166,8 @@ function verdelante(ejex, ejey) {
             esparcir_fuego(pos_fuego_inicio[0], pos_fuego_inicio[1]);
             break;
         case BALA:
+            avanzar = false;
+        case ENEMIGO:
             avanzar = false;
     }
     if (avanzar) {
@@ -542,7 +545,6 @@ function verdelante_bala(nuevo_ejex, nuevo_ejey, ejex, ejey) {
             ELEMENTO_NUEVO.classList.remove("fuego");
             ELEMENTO_NUEVO.removeAttribute("data-visto");
             partida[nuevo_ejey].splice(nuevo_ejex, 1, TEXTO);
-            partida[ejey].splice(ejex, 1, TEXTO);
             restar_fuego();
             cambiar_fondo();
             victoria();
@@ -600,10 +602,15 @@ function esparcir_fuego() {
 
                                 continue;
                             }
-                            if (ELEMENTO.textContent == PISTOLA) {
+                            else if (ELEMENTO.textContent == PISTOLA) {
                                 ELEMENTO.textContent = TEXTO;
                                 ELEMENTO.removeAttribute("id");
                                 insertar_pistola();
+                            } 
+                            else if (ELEMENTO.textContent == BALA) {
+                                ELEMENTO.textContent = TEXTO;
+                                ELEMENTO.removeAttribute("id");
+                                ELEMENTO.classList.remove("bala1", "bala2", "bala3", "bala4");
                             }
                             ELEMENTO.textContent = FUEGO;
                             ELEMENTO.dataset.visto = "visto";
