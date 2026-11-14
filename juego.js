@@ -144,7 +144,8 @@ function verdelante(ejex, ejey) {
             insertar_fuego();
             esparcir_fuego(pos_fuego_inicio[0], pos_fuego_inicio[1]);
             break;
-
+        case BALA:
+            avanzar = false;
     }
     if (avanzar) {
         texto_pisado = OBJETO;
@@ -281,7 +282,7 @@ document.addEventListener('keydown', (event) => {
             if (equipado == "pistola") {
                 crear_bala();
             }
-            
+
     }
 });
 
@@ -291,14 +292,20 @@ function crear_bala() {
     const PRINCIPAL = document.getElementById("protagonista");
     const ARRAY_ACTUAL = parseInt(PRINCIPAL.dataset.ejey);
     const POSICION_ACTUAL = parseInt(PRINCIPAL.dataset.ejex);
+    if (
+        (ARRAY_ACTUAL == (TAMAÑO - 1) && direccion == "sur") ||
+        (ARRAY_ACTUAL == 0 && direccion == "norte") ||
+        (POSICION_ACTUAL == (TAMAÑO - 1) && direccion == "oeste") ||
+        (POSICION_ACTUAL == 0 && direccion == "este")
+    ) { console.log("bloqueo"); return; }
     switch (direccion) {
         case 'norte':
             const NUEVO_ARRAY_N = ARRAY_ACTUAL - 1;
-            const ELEMENTO = document.querySelector(`[data-ejex="${POSICION_ACTUAL}"][data-ejey="${NUEVO_ARRAY_N}"]`);
-            if (ELEMENTO) {
+            const ELEMENTO_N = document.querySelector(`[data-ejex="${POSICION_ACTUAL}"][data-ejey="${NUEVO_ARRAY_N}"]`);
+            if (ELEMENTO_N) {
                 if (partida[NUEVO_ARRAY_N][POSICION_ACTUAL] == FUEGO) {
-                    ELEMENTO.removeAttribute("data-visto");
-                    ELEMENTO.classList.remove("fuego");
+                    ELEMENTO_N.removeAttribute("data-visto");
+                    ELEMENTO_N.classList.remove("fuego");
                     casillas_quemadas--;
                     casillas_restantes++;
                     CASILLAS_QUEMADAS.textContent = casillas_quemadas;
@@ -306,9 +313,71 @@ function crear_bala() {
                     victoria();
                 }
                 partida[NUEVO_ARRAY_N][POSICION_ACTUAL] = BALA;
-                ELEMENTO.id = "bala" + id_bala;
+                ELEMENTO_N.id = "bala" + id_bala;
                 cargar();
                 mover_bala(id_bala, POSICION_ACTUAL, NUEVO_ARRAY_N);
+                id_bala++;
+                break;
+            }
+        case 'sur':
+            const NUEVO_ARRAY_S = ARRAY_ACTUAL + 1;
+            const ELEMENTO_S = document.querySelector(`[data-ejex="${POSICION_ACTUAL}"][data-ejey="${NUEVO_ARRAY_S}"]`);
+            if (ELEMENTO_S) {
+                if (partida[NUEVO_ARRAY_S][POSICION_ACTUAL] == FUEGO) {
+                    ELEMENTO_S.removeAttribute("data-visto");
+                    ELEMENTO_S.classList.remove("fuego");
+                    casillas_quemadas--;
+                    casillas_restantes++;
+                    CASILLAS_QUEMADAS.textContent = casillas_quemadas;
+                    CASILLAS_RESTANTES.textContent = casillas_restantes;
+                    victoria();
+                }
+                partida[NUEVO_ARRAY_S][POSICION_ACTUAL] = BALA;
+                ELEMENTO_S.id = "bala" + id_bala;
+                cargar();
+                mover_bala(id_bala, POSICION_ACTUAL, NUEVO_ARRAY_S);
+                id_bala++;
+                break;
+            }
+
+        case 'este':
+            const NUEVO_ANCHO_E = POSICION_ACTUAL - 1;
+            const ELEMENTO_E = document.querySelector(`[data-ejex="${NUEVO_ANCHO_E}"][data-ejey="${ARRAY_ACTUAL}"]`);
+            if (ELEMENTO_E) {
+                if (partida[ARRAY_ACTUAL][NUEVO_ANCHO_E] == FUEGO) {
+                    ELEMENTO_E.removeAttribute("data-visto");
+                    ELEMENTO_E.classList.remove("fuego");
+                    casillas_quemadas--;
+                    casillas_restantes++;
+                    CASILLAS_QUEMADAS.textContent = casillas_quemadas;
+                    CASILLAS_RESTANTES.textContent = casillas_restantes;
+                    victoria();
+                }
+                partida[ARRAY_ACTUAL][NUEVO_ANCHO_E] = BALA;
+                ELEMENTO_E.id = "bala" + id_bala;
+                cargar();
+                mover_bala(id_bala, NUEVO_ANCHO_E, ARRAY_ACTUAL);
+                id_bala++;
+                break;
+            }
+
+        case 'oeste':
+            const NUEVO_ANCHO_O = POSICION_ACTUAL + 1;
+            const ELEMENTO_O = document.querySelector(`[data-ejex="${NUEVO_ANCHO_O}"][data-ejey="${ARRAY_ACTUAL}"]`);
+            if (ELEMENTO_O) {
+                if (partida[ARRAY_ACTUAL][NUEVO_ANCHO_O] == FUEGO) {
+                    ELEMENTO_O.removeAttribute("data-visto");
+                    ELEMENTO_O.classList.remove("fuego");
+                    casillas_quemadas--;
+                    casillas_restantes++;
+                    CASILLAS_QUEMADAS.textContent = casillas_quemadas;
+                    CASILLAS_RESTANTES.textContent = casillas_restantes;
+                    victoria();
+                }
+                partida[ARRAY_ACTUAL][NUEVO_ANCHO_O] = BALA;
+                ELEMENTO_O.id = "bala" + id_bala;
+                cargar();
+                mover_bala(id_bala, NUEVO_ANCHO_O, ARRAY_ACTUAL);
                 id_bala++;
                 break;
             }
@@ -353,6 +422,103 @@ function mover_bala(id, ejex, ejey) {
                     }
                 }, VELOCIDAD_BALA * x);
             }
+            break;
+
+
+        case 'sur':
+            for (let x = 0; x < TAMAÑO; x++) {
+                setTimeout(() => {
+                    const EL_BALA = document.getElementById("bala" + id);
+                    if (!movimiento) {
+                        return;
+                    }
+                    if (!verdelante_bala(ejex, ejey + x, ejex, ejey + x - 1)) {
+                        movimiento = false;
+                        return;
+                    }
+                    if (EL_BALA) {
+                        EL_BALA.classList.remove("bala1", "bala2", "bala3", "bala4");
+                        EL_BALA.removeAttribute("id");
+                        const ELEMENTO = document.querySelector(`[data-ejex="${ejex}"][data-ejey="${ejey + x}"]`);
+                        if (ELEMENTO) {
+                            ELEMENTO.id = "bala" + id;
+                            if (clase == 5) {
+                                clase = 1;
+                            }
+                            ELEMENTO.classList.add("bala" + clase);
+                            partida[ejey + x].splice(ejex, 1, BALA);
+                            partida[ejey + x - 1].splice(ejex, 1, TEXTO);
+                            clase++;
+                            cargar();
+                        }
+                    }
+                }, VELOCIDAD_BALA * x);
+            }
+            break;
+
+
+        case 'este':
+            for (let x = 0; x < TAMAÑO; x++) {
+                setTimeout(() => {
+                    const EL_BALA = document.getElementById("bala" + id);
+                    if (!movimiento) {
+                        return;
+                    }
+                    if (!verdelante_bala(ejex - x, ejey, ejex - x + 1, ejey)) {
+                        movimiento = false;
+                        return;
+                    }
+                    if (EL_BALA) {
+                        EL_BALA.classList.remove("bala1", "bala2", "bala3", "bala4");
+                        EL_BALA.removeAttribute("id");
+                        const ELEMENTO = document.querySelector(`[data-ejex="${ejex - x}"][data-ejey="${ejey}"]`);
+                        if (ELEMENTO) {
+                            ELEMENTO.id = "bala" + id;
+                            if (clase == 5) {
+                                clase = 1;
+                            }
+                            ELEMENTO.classList.add("bala" + clase);
+                            partida[ejey].splice(ejex - x, 1, BALA);
+                            partida[ejey].splice(ejex - x + 1, 1, TEXTO);
+                            clase++;
+                            cargar();
+                        }
+                    }
+                }, VELOCIDAD_BALA * x);
+            }
+            break;
+
+
+        case 'oeste':
+            for (let x = 0; x < TAMAÑO; x++) {
+                setTimeout(() => {
+                    const EL_BALA = document.getElementById("bala" + id);
+                    if (!movimiento) {
+                        return;
+                    }
+                    if (!verdelante_bala(ejex + x, ejey, ejex + x - 1, ejey)) {
+                        movimiento = false;
+                        return;
+                    }
+                    if (EL_BALA) {
+                        EL_BALA.classList.remove("bala1", "bala2", "bala3", "bala4");
+                        EL_BALA.removeAttribute("id");
+                        const ELEMENTO = document.querySelector(`[data-ejex="${ejex + x}"][data-ejey="${ejey}"]`);
+                        if (ELEMENTO) {
+                            ELEMENTO.id = "bala" + id;
+                            if (clase == 5) {
+                                clase = 1;
+                            }
+                            ELEMENTO.classList.add("bala" + clase);
+                            partida[ejey].splice(ejex + x, 1, BALA);
+                            partida[ejey].splice(ejex + x - 1, 1, TEXTO);
+                            clase++;
+                            cargar();
+                        }
+                    }
+                }, VELOCIDAD_BALA * x);
+            }
+            break;
     }
 }
 
@@ -372,22 +538,26 @@ function verdelante_bala(nuevo_ejex, nuevo_ejey, ejex, ejey) {
             casillas_quemadas--;
             CASILLAS_QUEMADAS.textContent = casillas_quemadas;
             CASILLAS_RESTANTES.textContent = casillas_restantes;
+            cambiar_fondo();
             victoria();
             return false;
-        }else if (partida[nuevo_ejey][nuevo_ejex] == ENEMIGO){
+        } else if (partida[nuevo_ejey][nuevo_ejex] == ENEMIGO) {
             ELEMENTO.classList.remove("bala1", "bala2", "bala3", "bala4");
             ELEMENTO.removeAttribute("id");
             ELEMENTO_NUEVO.classList.remove("enemigo");
             partida[nuevo_ejey].splice(nuevo_ejex, 1, FUEGO);
+            partida[ejey].splice(ejex, 1, TEXTO);
             casillas_restantes--;
             casillas_quemadas++;
             CASILLAS_QUEMADAS.textContent = casillas_quemadas;
             CASILLAS_RESTANTES.textContent = casillas_restantes;
+            cambiar_fondo();
             generar_fuego_de_enemigo(nuevo_ejey, nuevo_ejex);
-        } else {
-            return true;
+            return false;
         }
         cargar();
+        return true;
+
     } else {
         partida[ejey].splice(ejex, 1, TEXTO);
         const ULTIMO_ELEMENTO = document.querySelector(`[data-ejex="${ejex}"][data-ejey="${ejey}"]`);
@@ -455,35 +625,42 @@ function esparcir_fuego() {
             comprobar_vida();
             daño = false;
         }
-        if (casillas_quemadas > 100) {
-            const FONDO = document.getElementById("body");
-            FONDO.style.background = "linear-gradient(rgba(255, 83, 83, 0.464),rgba(214, 112, 17, 0.46),rgba(231, 210, 20, 0.46)) , url(../img/fondowebp.webp)";
-            FONDO.style.backgroundPosition = "center";
-            FONDO.style.backgroundSize = "cover";
-        }
-        if (casillas_quemadas > 200) {
-            const FONDO = document.getElementById("body");
-            FONDO.style.background = "linear-gradient(rgba(212, 43, 43, 0.57),rgba(214, 112, 17, 0.62),rgba(231, 210, 20, 0.6)) , url(../img/fondowebp.webp)";
-            FONDO.style.backgroundPosition = "center";
-            FONDO.style.backgroundSize = "cover";
-        }
-        if (casillas_quemadas > 300) {
-            const FONDO = document.getElementById("body");
-            FONDO.style.background = "linear-gradient(rgba(214, 26, 26, 0.73),rgba(214, 112, 17, 0.8),rgba(231, 210, 20, 0.74)) , url(../img/fondowebp.webp)";
-            FONDO.style.backgroundPosition = "center";
-            FONDO.style.backgroundSize = "cover";
-        }
-        if (casillas_quemadas > 350) {
-            const FONDO = document.getElementById("body");
-            FONDO.style.background = "linear-gradient(rgba(248, 8, 8, 0.81),rgba(255, 123, 0, 0.81),rgba(252, 227, 1, 0.87)) , url(../img/fondowebp.webp)";
-            FONDO.style.backgroundPosition = "center";
-            FONDO.style.backgroundSize = "cover";
-        }
+        cambiar_fondo();
         cargar();
         esparcir_fuego();
     }, VELOCIDAD_FUEGO);
 }
 
+
+//Funcion encargada de cambiar el fondo segun el estado de las casillas
+
+function cambiar_fondo() {
+    const FONDO = document.getElementById("body");
+    if (casillas_quemadas > 100) {
+        FONDO.style.background = "linear-gradient(rgba(255, 83, 83, 0.464),rgba(214, 112, 17, 0.46),rgba(231, 210, 20, 0.46)) , url(../img/fondowebp.webp)";
+        FONDO.style.backgroundPosition = "center";
+        FONDO.style.backgroundSize = "cover";
+    }
+    else if (casillas_quemadas > 200) {
+        FONDO.style.background = "linear-gradient(rgba(212, 43, 43, 0.57),rgba(214, 112, 17, 0.62),rgba(231, 210, 20, 0.6)) , url(../img/fondowebp.webp)";
+        FONDO.style.backgroundPosition = "center";
+        FONDO.style.backgroundSize = "cover";
+    }
+    else if (casillas_quemadas > 300) {
+        FONDO.style.background = "linear-gradient(rgba(214, 26, 26, 0.73),rgba(214, 112, 17, 0.8),rgba(231, 210, 20, 0.74)) , url(../img/fondowebp.webp)";
+        FONDO.style.backgroundPosition = "center";
+        FONDO.style.backgroundSize = "cover";
+    }
+    else if (casillas_quemadas > 350) {
+        FONDO.style.background = "linear-gradient(rgba(248, 8, 8, 0.81),rgba(255, 123, 0, 0.81),rgba(252, 227, 1, 0.87)) , url(../img/fondowebp.webp)";
+        FONDO.style.backgroundPosition = "center";
+        FONDO.style.backgroundSize = "cover";
+    } else {
+        FONDO.style.background = "linear-gradient(rgba(255, 255, 255, 0.464), rgba(0, 128, 0, 0.53)), url(../img/fondowebp.webp)";
+        FONDO.style.backgroundPosition = "center";
+        FONDO.style.backgroundSize = "cover";
+    }
+}
 
 //Funcion encargada de comprobar la vida 
 
