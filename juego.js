@@ -163,7 +163,7 @@ function verdelante(ejex, ejey) {
             inventario.pistola = objetos.pistola;
             cargar_inventario();
             insertar_fuego();
-            esparcir_fuego(pos_fuego_inicio[0], pos_fuego_inicio[1]);
+            esparcir_fuego();
             break;
         case BALA:
             avanzar = false;
@@ -290,7 +290,7 @@ document.addEventListener('keydown', (event) => {
 
 document.addEventListener('click', () => {
     const ahora = Date.now();
-    if (ahora - ultimo_click < COOLDOWN_CLICK) return;
+    if (ahora - ultimo_click < COOLDOWN_CLICK || vida <= 0) return;
     ultimo_click = ahora;
 
     if (equipado == "pistola") {
@@ -299,6 +299,7 @@ document.addEventListener('click', () => {
 });
 
 document.addEventListener('keydown', (event) => {
+    if (vida <= 0) return;
     switch (event.key) {
         case 'q':
         case 'Q':
@@ -545,6 +546,7 @@ function verdelante_bala(nuevo_ejex, nuevo_ejey, ejex, ejey) {
             ELEMENTO_NUEVO.classList.remove("fuego");
             ELEMENTO_NUEVO.removeAttribute("data-visto");
             partida[nuevo_ejey].splice(nuevo_ejex, 1, TEXTO);
+            (ELEMENTO.textContent == FUEGO) ? partida[ejey].splice(nuevo_ejex, 1, FUEGO): partida[ejey].splice(nuevo_ejex, 1, TEXTO);
             restar_fuego();
             cambiar_fondo();
             victoria();
@@ -566,7 +568,7 @@ function verdelante_bala(nuevo_ejex, nuevo_ejey, ejex, ejey) {
         return true;
 
     } else {
-        partida[ejey].splice(ejex, 1, TEXTO);
+        (partida[ejey][ejex] == FUEGO)? partida[ejey].splice(ejex, 1, FUEGO) : partida[ejey].splice(ejex, 1, TEXTO);
         const ULTIMO_ELEMENTO = document.querySelector(`[data-ejex="${ejex}"][data-ejey="${ejey}"]`);
         ULTIMO_ELEMENTO.removeAttribute("id");
         ULTIMO_ELEMENTO.classList.remove("bala1", "bala2", "bala3", "bala4");
