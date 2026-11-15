@@ -317,7 +317,7 @@ function crear_bala() {
         (ARRAY_ACTUAL == 0 && direccion == "norte") ||
         (POSICION_ACTUAL == (TAMAÑO - 1) && direccion == "oeste") ||
         (POSICION_ACTUAL == 0 && direccion == "este")
-    ) { console.log("bloqueo"); return; }
+    ) return; 
     switch (direccion) {
         case 'norte':
             const NUEVO_ARRAY_N = ARRAY_ACTUAL - 1;
@@ -387,8 +387,6 @@ function crear_bala() {
             }
     }
 }
-
-
 
 //Funcion encargada de mover la bala
 
@@ -538,7 +536,7 @@ function verdelante_bala(nuevo_ejex, nuevo_ejey, ejex, ejey) {
             ELEMENTO_NUEVO.classList.remove("fuego");
             ELEMENTO_NUEVO.removeAttribute("data-visto");
             partida[nuevo_ejey].splice(nuevo_ejex, 1, TEXTO);
-            (ELEMENTO.textContent == FUEGO) ? partida[ejey].splice(nuevo_ejex, 1, FUEGO) : partida[ejey].splice(nuevo_ejex, 1, TEXTO);
+            (partida[ejey][ejex] == FUEGO) ? partida[ejey].splice(nuevo_ejex, 1, FUEGO) : partida[ejey].splice(ejex, 1, TEXTO);
             restar_fuego();
             cambiar_fondo();
             cargar();
@@ -566,6 +564,7 @@ function verdelante_bala(nuevo_ejex, nuevo_ejey, ejex, ejey) {
         const ULTIMO_ELEMENTO = document.querySelector(`[data-ejex="${ejex}"][data-ejey="${ejey}"]`);
         ULTIMO_ELEMENTO.removeAttribute("id");
         ULTIMO_ELEMENTO.classList.remove("bala1", "bala2", "bala3", "bala4");
+        cargar();
     }
 }
 
