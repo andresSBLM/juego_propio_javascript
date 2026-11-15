@@ -319,9 +319,9 @@ document.addEventListener('keydown', (event) => {
             }
             break;
         case ' ':
-            velocidad_fuego = 100000;
-            velocidad_enemigo = 100000;
-            ratio_spawneo = 1000;
+            velocidad_fuego = 10000;
+            velocidad_enemigo = 10000;
+            ratio_spawneo = 10;
     }
 });
 
@@ -336,7 +336,7 @@ function crear_bala() {
         (ARRAY_ACTUAL == 0 && direccion == "norte") ||
         (POSICION_ACTUAL == (TAMAÑO - 1) && direccion == "oeste") ||
         (POSICION_ACTUAL == 0 && direccion == "este")
-    ) return; 
+    ) return;
     switch (direccion) {
         case 'norte':
             const NUEVO_ARRAY_N = ARRAY_ACTUAL - 1;
@@ -353,7 +353,9 @@ function crear_bala() {
                     ELEMENTO_N.removeAttribute("id");
                     ELEMENTO_N.classList.remove("enemigo");
                     ELEMENTO_N.style.removeProperty("transform");
-                    partida[NUEVO_ARRAY_N].splice(POSICION_ACTUAL, 1, TEXTO);
+                    partida[NUEVO_ARRAY_N].splice(POSICION_ACTUAL, 1, FUEGO);
+                    ELEMENTO_N.classList.add("fuego");
+                    ELEMENTO_N.dataset.visto = "visto";
                     cargar();
                     return;
                 }
@@ -379,7 +381,9 @@ function crear_bala() {
                     ELEMENTO_S.removeAttribute("id");
                     ELEMENTO_S.classList.remove("enemigo");
                     ELEMENTO_S.style.removeProperty("transform");
-                    partida[NUEVO_ARRAY_S].splice(POSICION_ACTUAL, 1, TEXTO);
+                    partida[NUEVO_ARRAY_S].splice(POSICION_ACTUAL, 1, FUEGO);
+                    ELEMENTO_S.classList.add("fuego");
+                    ELEMENTO_S.dataset.visto = "visto";
                     cargar();
                     return;
                 }
@@ -406,7 +410,9 @@ function crear_bala() {
                     ELEMENTO_E.removeAttribute("id");
                     ELEMENTO_E.classList.remove("enemigo");
                     ELEMENTO_E.style.removeProperty("transform");
-                    partida[ARRAY_ACTUAL].splice(NUEVO_ANCHO_E, 1, TEXTO);
+                    partida[ARRAY_ACTUAL].splice(NUEVO_ANCHO_E, 1, FUEGO);
+                    ELEMENTO_E.classList.add("fuego");
+                    ELEMENTO_E.dataset.visto = "visto";
                     cargar();
                     return;
                 }
@@ -433,7 +439,9 @@ function crear_bala() {
                     ELEMENTO_O.removeAttribute("id");
                     ELEMENTO_O.classList.remove("enemigo");
                     ELEMENTO_O.style.removeProperty("transform");
-                    partida[ARRAY_ACTUAL].splice(NUEVO_ANCHO_O, 1, TEXTO);
+                    partida[ARRAY_ACTUAL].splice(NUEVO_ANCHO_O, 1, FUEGO);
+                    ELEMENTO_O.classList.add("fuego");
+                    ELEMENTO_O.dataset.visto = "visto";
                     cargar();
                     return;
                 }
@@ -458,31 +466,32 @@ function mover_bala(id, ejex, ejey) {
             for (let x = 0; x < TAMAÑO; x++) {
                 setTimeout(() => {
                     const EL_BALA = document.getElementById("bala" + id);
-                    if (!movimiento) {
+                    if (!movimiento) return;
+                    if (!EL_BALA) {
+                        movimiento = false;
                         return;
                     }
                     if (!verdelante_bala(ejex, ejey - x, ejex, ejey - x + 1)) {
                         movimiento = false;
                         return;
                     }
-                    if (EL_BALA) {
-                        EL_BALA.classList.remove("bala1", "bala2", "bala3", "bala4");
-                        EL_BALA.removeAttribute("id");
-                        const ELEMENTO = conseguir_elemento(ejex, ejey - x);
-                        if (ELEMENTO) {
-                            ELEMENTO.id = "bala" + id;
-                            if (clase == 5) {
-                                clase = 1;
-                            }
-                            ELEMENTO.classList.add("bala" + clase);
-                            partida[ejey - x].splice(ejex, 1, BALA);
-                            if (!(partida[ejey - x + 1][ejex] == PROTA)) {
-                                partida[ejey - x + 1].splice(ejex, 1, TEXTO);
-                            }
-                            clase++;
-                            cargar();
+                    EL_BALA.classList.remove("bala1", "bala2", "bala3", "bala4");
+                    EL_BALA.removeAttribute("id");
+                    const ELEMENTO = conseguir_elemento(ejex, ejey - x);
+                    if (ELEMENTO) {
+                        ELEMENTO.id = "bala" + id;
+                        if (clase == 5) {
+                            clase = 1;
                         }
+                        ELEMENTO.classList.add("bala" + clase);
+                        partida[ejey - x].splice(ejex, 1, BALA);
+                        if (!(partida[ejey - x + 1][ejex] == PROTA)) {
+                            partida[ejey - x + 1].splice(ejex, 1, TEXTO);
+                        }
+                        clase++;
+                        cargar();
                     }
+
                 }, VELOCIDAD_BALA * x);
             }
             break;
@@ -492,31 +501,32 @@ function mover_bala(id, ejex, ejey) {
             for (let x = 0; x < TAMAÑO; x++) {
                 setTimeout(() => {
                     const EL_BALA = document.getElementById("bala" + id);
-                    if (!movimiento) {
+                    if (!movimiento) return;
+                    if (!EL_BALA) {
+                        movimiento = false;
                         return;
                     }
                     if (!verdelante_bala(ejex, ejey + x, ejex, ejey + x - 1)) {
                         movimiento = false;
                         return;
                     }
-                    if (EL_BALA) {
-                        EL_BALA.classList.remove("bala1", "bala2", "bala3", "bala4");
-                        EL_BALA.removeAttribute("id");
-                        const ELEMENTO = conseguir_elemento(ejex, ejey + x);
-                        if (ELEMENTO) {
-                            ELEMENTO.id = "bala" + id;
-                            if (clase == 5) {
-                                clase = 1;
-                            }
-                            ELEMENTO.classList.add("bala" + clase);
-                            partida[ejey + x].splice(ejex, 1, BALA);
-                            if (!(partida[ejey + x - 1][ejex] == PROTA)) {
-                                partida[ejey + x - 1].splice(ejex, 1, TEXTO);
-                            }
-                            clase++;
-                            cargar();
+                    EL_BALA.classList.remove("bala1", "bala2", "bala3", "bala4");
+                    EL_BALA.removeAttribute("id");
+                    const ELEMENTO = conseguir_elemento(ejex, ejey + x);
+                    if (ELEMENTO) {
+                        ELEMENTO.id = "bala" + id;
+                        if (clase == 5) {
+                            clase = 1;
                         }
+                        ELEMENTO.classList.add("bala" + clase);
+                        partida[ejey + x].splice(ejex, 1, BALA);
+                        if (!(partida[ejey + x - 1][ejex] == PROTA)) {
+                            partida[ejey + x - 1].splice(ejex, 1, TEXTO);
+                        }
+                        clase++;
+                        cargar();
                     }
+
                 }, VELOCIDAD_BALA * x);
             }
             break;
@@ -526,30 +536,33 @@ function mover_bala(id, ejex, ejey) {
             for (let x = 0; x < TAMAÑO; x++) {
                 setTimeout(() => {
                     const EL_BALA = document.getElementById("bala" + id);
-                    if (!movimiento) {
+                    if (!movimiento) return;
+                    if (!EL_BALA) {
+                        movimiento = false;
                         return;
                     }
                     if (!verdelante_bala(ejex - x, ejey, ejex - x + 1, ejey)) {
                         movimiento = false;
                         return;
                     }
-                    if (EL_BALA) {
-                        EL_BALA.classList.remove("bala1", "bala2", "bala3", "bala4");
-                        EL_BALA.removeAttribute("id");
-                        const ELEMENTO = conseguir_elemento(ejex - x, ejey);
-                        if (ELEMENTO) {
-                            ELEMENTO.id = "bala" + id;
-                            if (clase == 5) {
-                                clase = 1;
-                            }
-                            ELEMENTO.classList.add("bala" + clase);
-                            partida[ejey].splice(ejex - x, 1, BALA);
-                            if (!(partida[ejey][ejex - x + 1] == PROTA)) {
-                                partida[ejey].splice(ejex - x + 1, 1, TEXTO);
-                            }
-                            clase++;
+
+                    EL_BALA.classList.remove("bala1", "bala2", "bala3", "bala4");
+                    EL_BALA.removeAttribute("id");
+                    const ELEMENTO = conseguir_elemento(ejex - x, ejey);
+                    if (ELEMENTO) {
+                        ELEMENTO.id = "bala" + id;
+                        if (clase == 5) {
+                            clase = 1;
                         }
+                        ELEMENTO.classList.add("bala" + clase);
+                        partida[ejey].splice(ejex - x, 1, BALA);
+                        if (!(partida[ejey][ejex - x + 1] == PROTA)) {
+                            partida[ejey].splice(ejex - x + 1, 1, TEXTO);
+                        }
+                        clase++;
+                        cargar();
                     }
+
                 }, VELOCIDAD_BALA * x);
             }
             break;
@@ -559,31 +572,33 @@ function mover_bala(id, ejex, ejey) {
             for (let x = 0; x < TAMAÑO; x++) {
                 setTimeout(() => {
                     const EL_BALA = document.getElementById("bala" + id);
-                    if (!movimiento) {
+                    if (!movimiento) return;
+                    if (!EL_BALA) {
+                        movimiento = false;
                         return;
                     }
                     if (!verdelante_bala(ejex + x, ejey, ejex + x - 1, ejey)) {
                         movimiento = false;
                         return;
                     }
-                    if (EL_BALA) {
-                        EL_BALA.classList.remove("bala1", "bala2", "bala3", "bala4");
-                        EL_BALA.removeAttribute("id");
-                        const ELEMENTO = conseguir_elemento(ejex + x, ejey);
-                        if (ELEMENTO) {
-                            ELEMENTO.id = "bala" + id;
-                            if (clase == 5) {
-                                clase = 1;
-                            }
-                            ELEMENTO.classList.add("bala" + clase);
-                            partida[ejey].splice(ejex + x, 1, BALA);
-                            if (!(partida[ejey][ejex + x - 1] == PROTA)) {
-                                partida[ejey].splice(ejex + x - 1, 1, TEXTO);
-                            }
-                            clase++
-                            cargar();
+
+                    EL_BALA.classList.remove("bala1", "bala2", "bala3", "bala4");
+                    EL_BALA.removeAttribute("id");
+                    const ELEMENTO = conseguir_elemento(ejex + x, ejey);
+                    if (ELEMENTO) {
+                        ELEMENTO.id = "bala" + id;
+                        if (clase == 5) {
+                            clase = 1;
                         }
+                        ELEMENTO.classList.add("bala" + clase);
+                        partida[ejey].splice(ejex + x, 1, BALA);
+                        if (!(partida[ejey][ejex + x - 1] == PROTA)) {
+                            partida[ejey].splice(ejex + x - 1, 1, TEXTO);
+                        }
+                        clase++
+                        cargar();
                     }
+
                 }, VELOCIDAD_BALA * x);
             }
             break;
@@ -601,7 +616,6 @@ function verdelante_bala(nuevo_ejex, nuevo_ejey, ejex, ejey) {
             ELEMENTO_NUEVO.classList.remove("fuego");
             ELEMENTO_NUEVO.removeAttribute("data-visto");
             partida[nuevo_ejey].splice(nuevo_ejex, 1, TEXTO);
-            (partida[ejey][ejex] == FUEGO) ? partida[ejey].splice(nuevo_ejex, 1, FUEGO) : partida[ejey].splice(ejex, 1, TEXTO);
             restar_fuego();
             cambiar_fondo();
             cargar();
@@ -613,6 +627,7 @@ function verdelante_bala(nuevo_ejex, nuevo_ejey, ejex, ejey) {
             ELEMENTO_NUEVO.removeAttribute("id");
             ELEMENTO_NUEVO.style.removeProperty("transform");
             ELEMENTO_NUEVO.dataset.visto = "visto";
+            ELEMENTO_NUEVO.classList.add("fuego");
             partida[ejey].splice(ejex, 1, TEXTO);
             partida[nuevo_ejey].splice(nuevo_ejex, 1, FUEGO);
             enemigos_derrotados++;
@@ -632,7 +647,6 @@ function verdelante_bala(nuevo_ejex, nuevo_ejey, ejex, ejey) {
         cargar();
     }
 }
-
 
 //Función encargada de esparcir el incendio
 
@@ -667,7 +681,6 @@ function esparcir_fuego() {
                                 ELEMENTO.removeAttribute("id");
                                 ELEMENTO.classList.remove("bala1", "bala2", "bala3", "bala4");
                             } else if (partida[ejey + y][ejex + x] == ENEMIGO) {
-
                                 continue;
                             }
                             ELEMENTO.textContent = FUEGO;
@@ -690,7 +703,6 @@ function esparcir_fuego() {
         esparcir_fuego();
     }, velocidad_fuego);
 }
-
 
 //Funcion encargada de cambiar el fondo segun el estado de las casillas
 
@@ -756,7 +768,7 @@ function comprobar_vida() {
 //Funcion encargada de gestionar la victoria
 
 function victoria() {
-    if (casillas_quemadas == 0 && casillas_restantes == (TAMAÑO * TAMAÑO)) {
+    if (casillas_quemadas == 0 && casillas_restantes >= (TAMAÑO * TAMAÑO)) {
         setTimeout(() => {
             alert("Felicidades conseguiste apagar el incendio");
             window.location.href = "index.html";
@@ -831,6 +843,8 @@ function verdelante_enemigo(ejex, ejey) {
             vida--;
             comprobar_vida();
             return false;
+        case BALA:
+            return false;
         default:
             return true;
     }
@@ -849,7 +863,7 @@ function mover_enemigo(id) {
         if (!EL_ENEMIGO || !JUGADOR) return;
         const EJE_X_ENEMIGO = parseInt(EL_ENEMIGO.dataset.ejex);
         const EJE_Y_ENEMIGO = parseInt(EL_ENEMIGO.dataset.ejey);
-        
+
         const EJE_X_JUGADOR = parseInt(JUGADOR.dataset.ejex);
         const EJE_Y_JUGADOR = parseInt(JUGADOR.dataset.ejey);
 
@@ -863,7 +877,7 @@ function mover_enemigo(id) {
         } else if (EJE_Y_ENEMIGO < EJE_Y_JUGADOR) {
             movimiento_y = 'sur';
         }
-        
+
         if (movimiento_x && movimiento_y) {
             desplazamiento_random = Math.floor(Math.random() * 2);
         } else if (movimiento_x) {
@@ -959,6 +973,16 @@ function mover_enemigo(id) {
         mover_enemigo(id);
     }, velocidad_enemigo);
 
+}
+
+//Funcion encargada de gestionar los dropeos de los enemigos
+
+function dropear_objeto(ejex, ejey) {
+    const NUMERO_RANDOM = Math.floor(Math.random() * 101);
+
+    if (NUMERO_RANDOM <= 10) {
+
+    }
 }
 
 //Funciones encargadas de gestionar las cuentas de las casillas quemadas y restantes
