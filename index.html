@@ -61,6 +61,7 @@
         const ENEMIGO = "9";
         const FUEGO = "x";
         const PISTOLA = "1";
+        const VENDAS = "2";
         const BALA = "o";
         const TAMAÑO = 20;
         const MITAD = Math.floor(TAMAÑO / 2);
@@ -88,18 +89,18 @@
         var casillas_restantes = TAMAÑO * TAMAÑO;
         var objetos = {
             'pistola': '../img/pistola.avif',
-            'venda': '../img/venda.pjeg'
+            'vendas': '../img/venda.jpeg'
         }
         var inventario = {};
         var equipado = "";
         var vida = 3;
         var tiempo_de_juego = 0;
-        var velocidad_fuego = 1000;
+        var velocidad_fuego = 2000;
 
         //VARIABLES DE LOS ENEMIGOS 
         var id_enemigo = 1;
-        var velocidad_enemigo = 100000;
-        var ratio_spawneo = 3;
+        var velocidad_enemigo = 1000;
+        var ratio_spawneo = 2;
         var enemigos_derrotados = 0;
 
         //VARIABLES DE LA PISTOLA

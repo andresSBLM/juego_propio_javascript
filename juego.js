@@ -77,6 +77,7 @@ function spawnear_jugador() {
     if (!LUGARES_DISPONIBLES) return;
     const NUM_RANDOM = Math.floor(Math.random() * (LUGARES_DISPONIBLES.length - 1));
     const LUGAR_RANDOM = LUGARES_DISPONIBLES[NUM_RANDOM];
+    if (!LUGAR_RANDOM) return;
     const EJE_Y = parseInt(LUGAR_RANDOM.dataset.ejey);
     const EJE_X = parseInt(LUGAR_RANDOM.dataset.ejex);
     partida[EJE_Y].splice(EJE_X, 1, PROTA);
@@ -175,6 +176,14 @@ function verdelante(ejex, ejey) {
             cargar_inventario();
             insertar_fuego();
             esparcir_fuego();
+            break;
+        case VENDAS:
+            avanzar = false;
+            ELEMENTO.removeAttribute("id");
+            ELEMENTO.textContent = TEXTO;
+            partida[ejey][ejex] = TEXTO;
+            inventario.vendas = objetos.vendas;
+            cargar_inventario();
             break;
         case BALA:
             avanzar = false;
@@ -356,6 +365,7 @@ function crear_bala() {
                     partida[NUEVO_ARRAY_N].splice(POSICION_ACTUAL, 1, FUEGO);
                     ELEMENTO_N.classList.add("fuego");
                     ELEMENTO_N.dataset.visto = "visto";
+                    dropear_objeto(POSICION_ACTUAL, NUEVO_ARRAY_N);
                     cargar();
                     return;
                 }
@@ -384,6 +394,7 @@ function crear_bala() {
                     partida[NUEVO_ARRAY_S].splice(POSICION_ACTUAL, 1, FUEGO);
                     ELEMENTO_S.classList.add("fuego");
                     ELEMENTO_S.dataset.visto = "visto";
+                    dropear_objeto(POSICION_ACTUAL, NUEVO_ARRAY_S);
                     cargar();
                     return;
                 }
@@ -413,6 +424,7 @@ function crear_bala() {
                     partida[ARRAY_ACTUAL].splice(NUEVO_ANCHO_E, 1, FUEGO);
                     ELEMENTO_E.classList.add("fuego");
                     ELEMENTO_E.dataset.visto = "visto";
+                    dropear_objeto(NUEVO_ANCHO_E, ARRAY_ACTUAL);
                     cargar();
                     return;
                 }
@@ -442,6 +454,7 @@ function crear_bala() {
                     partida[ARRAY_ACTUAL].splice(NUEVO_ANCHO_O, 1, FUEGO);
                     ELEMENTO_O.classList.add("fuego");
                     ELEMENTO_O.dataset.visto = "visto";
+                    dropear_objeto(NUEVO_ANCHO_O, ARRAY_ACTUAL);
                     cargar();
                     return;
                 }
@@ -632,10 +645,18 @@ function verdelante_bala(nuevo_ejex, nuevo_ejey, ejex, ejey) {
             partida[nuevo_ejey].splice(nuevo_ejex, 1, FUEGO);
             enemigos_derrotados++;
             ENEMIGOS.textContent = enemigos_derrotados;
+            dropear_objeto(nuevo_ejex, nuevo_ejey);
             cambiar_fondo();
             cargar();
             return false;
+        } else if (partida[nuevo_ejey][nuevo_ejex] == VENDAS) {
+            ELEMENTO.classList.remove("bala1", "bala2", "bala3", "bala4");
+            ELEMENTO.removeAttribute("id");
+            partida[ejey].splice(ejex, 1, TEXTO);
+            cargar();
+            return false;
         }
+        
         cargar();
         return true;
 
@@ -682,6 +703,9 @@ function esparcir_fuego() {
                                 ELEMENTO.classList.remove("bala1", "bala2", "bala3", "bala4");
                             } else if (partida[ejey + y][ejex + x] == ENEMIGO) {
                                 continue;
+                            } else if (partida[ejey + y][ejex + x] == VENDAS) {
+                                ELEMENTO.removeAttribute("id");
+                                partida[ejey + y].splice(ejex + x, 1, TEXTO);
                             }
                             ELEMENTO.textContent = FUEGO;
                             ELEMENTO.dataset.visto = "visto";
@@ -979,9 +1003,13 @@ function mover_enemigo(id) {
 
 function dropear_objeto(ejex, ejey) {
     const NUMERO_RANDOM = Math.floor(Math.random() * 101);
-
-    if (NUMERO_RANDOM <= 10) {
-
+    if (NUMERO_RANDOM <= 10 && !inventario.vendas) {
+        partida[ejey].splice(ejex, 1, VENDAS);
+        const ELEMENTO = conseguir_elemento(ejex, ejey);
+        ELEMENTO.id = "id_vendas";
+        ELEMENTO.classList.remove("fuego");
+        ELEMENTO.removeAttribute("data-visto");
+        restar_fuego();
     }
 }
 
