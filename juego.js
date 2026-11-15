@@ -7,7 +7,6 @@ recibe como parámetro el alto y ancho del tablero */
 function construir_tablero() {
     var partida = [];
     var clase = 1;
-    var contador = 0;
     const CONTENEDOR = document.createElement("div");
     CONTENEDOR.id = "contenedor_principal";
     for (let x = 0; x < TAMAÑO; x++) {
@@ -19,8 +18,6 @@ function construir_tablero() {
             array.push(TEXTO);
             CASILLA.classList.add("casilla");
             CASILLA.textContent = TEXTO;
-            CASILLA.dataset.pos = contador;
-            contador++;
             CONTENEDOR.appendChild(CASILLA);
         }
         clase++;
@@ -52,7 +49,6 @@ function cargar() {
         switch (casilla.textContent) {
             case PROTA:
                 casilla.id = "protagonista";
-                casilla.classList.remove("bala1");
                 break;
             case FUEGO:
                 casilla.classList.add("fuego");
@@ -71,26 +67,22 @@ function cargar() {
 
 function insertar_jugador() {
     partida[MITAD].splice(MITAD, 1, PROTA);
-    return MITAD;
 }
 
 //Funcion encargada de spawnear al jugador tras morir
 
 function spawnear_jugador() {
-    const EJE_X_RANDOM = Math.round(Math.random() * (TAMAÑO - 1));
-    const EJE_Y_RANDOM = Math.round(Math.random() * (TAMAÑO - 1));
-    switch (partida[EJE_Y_RANDOM][EJE_X_RANDOM]) {
-        case FUEGO:
-        case PISTOLA:
-        case ENEMIGO:
-        case BALA:
-            spawnear_jugador();
-            break;
-        default:
-            partida[EJE_Y_RANDOM].splice(EJE_X_RANDOM, 1, PROTA);
-            player_array = EJE_Y_RANDOM;
-            player_position = EJE_X_RANDOM;
-    }
+    cargar();
+    const LUGARES_DISPONIBLES = document.querySelectorAll(".casilla:not(.fuego):not([id])");
+    if (!LUGARES_DISPONIBLES) return;
+    const NUM_RANDOM = Math.floor(Math.random() * (LUGARES_DISPONIBLES.length - 1));
+    const LUGAR_RANDOM = LUGARES_DISPONIBLES[NUM_RANDOM];
+    const EJE_Y = parseInt(LUGAR_RANDOM.dataset.ejey);
+    const EJE_X = parseInt(LUGAR_RANDOM.dataset.ejex);
+    partida[EJE_Y].splice(EJE_X, 1, PROTA);
+    player_array = EJE_Y;
+    player_position = EJE_X;
+    cargar();
 }
 
 //Función que inserta el primer incendio en el juego
@@ -100,7 +92,7 @@ function insertar_fuego() {
     const EJE_Y = 0;
     partida[EJE_Y].splice(EJE_X, 1, FUEGO);
     pos_fuego_inicio = [EJE_X, EJE_Y];
-    const ELEMENTO = document.querySelector(`[data-ejex="${EJE_X}"][data-ejey="${EJE_Y}"]`);
+    const ELEMENTO = conseguir_elemento(EJE_X, EJE_Y);
     ELEMENTO.dataset.visto = "visto";
     sumar_fuego();
 }
@@ -110,7 +102,7 @@ function insertar_fuego() {
 
 function insertar_pistola() {
     const array_random = Math.round(Math.random() * (TAMAÑO - 1));
-    const posicion_random = Math.round(Math.random() * (MITAD - 1));
+    const posicion_random = Math.round(Math.random() * (TAMAÑO - 1));
     if (partida[array_random][posicion_random] == TEXTO) {
         partida[array_random][posicion_random] = PISTOLA;
     } else {
@@ -148,7 +140,7 @@ function verdireccion() {
 function verdelante(ejex, ejey) {
     var avanzar = true;
     const OBJETO = partida[ejey][ejex];
-    const ELEMENTO = document.querySelector(`[data-ejex="${ejex}"][data-ejey="${ejey}"]`)
+    const ELEMENTO = conseguir_elemento(ejex, ejey);
     switch (OBJETO) {
         case FUEGO:
             avanzar = false;
@@ -306,7 +298,9 @@ document.addEventListener('keydown', (event) => {
             if (equipado == "pistola") {
                 crear_bala();
             }
-
+            break;
+        case ' ':
+            velocidad_fuego = 10000;
     }
 });
 
@@ -325,13 +319,12 @@ function crear_bala() {
     switch (direccion) {
         case 'norte':
             const NUEVO_ARRAY_N = ARRAY_ACTUAL - 1;
-            const ELEMENTO_N = document.querySelector(`[data-ejex="${POSICION_ACTUAL}"][data-ejey="${NUEVO_ARRAY_N}"]`);
+            const ELEMENTO_N = conseguir_elemento(POSICION_ACTUAL, NUEVO_ARRAY_N);
             if (ELEMENTO_N) {
                 if (partida[NUEVO_ARRAY_N][POSICION_ACTUAL] == FUEGO) {
                     ELEMENTO_N.removeAttribute("data-visto");
                     ELEMENTO_N.classList.remove("fuego");
                     restar_fuego();
-                    victoria();
                 }
                 partida[NUEVO_ARRAY_N][POSICION_ACTUAL] = BALA;
                 ELEMENTO_N.id = "bala" + id_bala;
@@ -342,13 +335,12 @@ function crear_bala() {
             }
         case 'sur':
             const NUEVO_ARRAY_S = ARRAY_ACTUAL + 1;
-            const ELEMENTO_S = document.querySelector(`[data-ejex="${POSICION_ACTUAL}"][data-ejey="${NUEVO_ARRAY_S}"]`);
+            const ELEMENTO_S = conseguir_elemento(POSICION_ACTUAL, NUEVO_ARRAY_S);
             if (ELEMENTO_S) {
                 if (partida[NUEVO_ARRAY_S][POSICION_ACTUAL] == FUEGO) {
                     ELEMENTO_S.removeAttribute("data-visto");
                     ELEMENTO_S.classList.remove("fuego");
                     restar_fuego();
-                    victoria();
                 }
                 partida[NUEVO_ARRAY_S][POSICION_ACTUAL] = BALA;
                 ELEMENTO_S.id = "bala" + id_bala;
@@ -360,13 +352,12 @@ function crear_bala() {
 
         case 'este':
             const NUEVO_ANCHO_E = POSICION_ACTUAL - 1;
-            const ELEMENTO_E = document.querySelector(`[data-ejex="${NUEVO_ANCHO_E}"][data-ejey="${ARRAY_ACTUAL}"]`);
+            const ELEMENTO_E = conseguir_elemento(NUEVO_ANCHO_E, ARRAY_ACTUAL);
             if (ELEMENTO_E) {
                 if (partida[ARRAY_ACTUAL][NUEVO_ANCHO_E] == FUEGO) {
                     ELEMENTO_E.removeAttribute("data-visto");
                     ELEMENTO_E.classList.remove("fuego");
                     restar_fuego();
-                    victoria();
                 }
                 partida[ARRAY_ACTUAL][NUEVO_ANCHO_E] = BALA;
                 ELEMENTO_E.id = "bala" + id_bala;
@@ -378,13 +369,12 @@ function crear_bala() {
 
         case 'oeste':
             const NUEVO_ANCHO_O = POSICION_ACTUAL + 1;
-            const ELEMENTO_O = document.querySelector(`[data-ejex="${NUEVO_ANCHO_O}"][data-ejey="${ARRAY_ACTUAL}"]`);
+            const ELEMENTO_O = conseguir_elemento(NUEVO_ANCHO_O, ARRAY_ACTUAL);
             if (ELEMENTO_O) {
                 if (partida[ARRAY_ACTUAL][NUEVO_ANCHO_O] == FUEGO) {
                     ELEMENTO_O.removeAttribute("data-visto");
                     ELEMENTO_O.classList.remove("fuego");
                     restar_fuego();
-                    victoria();
                 }
                 partida[ARRAY_ACTUAL][NUEVO_ANCHO_O] = BALA;
                 ELEMENTO_O.id = "bala" + id_bala;
@@ -419,7 +409,7 @@ function mover_bala(id, ejex, ejey) {
                     if (EL_BALA) {
                         EL_BALA.classList.remove("bala1", "bala2", "bala3", "bala4");
                         EL_BALA.removeAttribute("id");
-                        const ELEMENTO = document.querySelector(`[data-ejex="${ejex}"][data-ejey="${ejey - x}"]`);
+                        const ELEMENTO = conseguir_elemento(ejex, ejey - x);
                         if (ELEMENTO) {
                             ELEMENTO.id = "bala" + id;
                             if (clase == 5) {
@@ -451,7 +441,7 @@ function mover_bala(id, ejex, ejey) {
                     if (EL_BALA) {
                         EL_BALA.classList.remove("bala1", "bala2", "bala3", "bala4");
                         EL_BALA.removeAttribute("id");
-                        const ELEMENTO = document.querySelector(`[data-ejex="${ejex}"][data-ejey="${ejey + x}"]`);
+                        const ELEMENTO = conseguir_elemento(ejex, ejey + x);
                         if (ELEMENTO) {
                             ELEMENTO.id = "bala" + id;
                             if (clase == 5) {
@@ -483,7 +473,7 @@ function mover_bala(id, ejex, ejey) {
                     if (EL_BALA) {
                         EL_BALA.classList.remove("bala1", "bala2", "bala3", "bala4");
                         EL_BALA.removeAttribute("id");
-                        const ELEMENTO = document.querySelector(`[data-ejex="${ejex - x}"][data-ejey="${ejey}"]`);
+                        const ELEMENTO = conseguir_elemento(ejex - x, ejey);
                         if (ELEMENTO) {
                             ELEMENTO.id = "bala" + id;
                             if (clase == 5) {
@@ -515,7 +505,7 @@ function mover_bala(id, ejex, ejey) {
                     if (EL_BALA) {
                         EL_BALA.classList.remove("bala1", "bala2", "bala3", "bala4");
                         EL_BALA.removeAttribute("id");
-                        const ELEMENTO = document.querySelector(`[data-ejex="${ejex + x}"][data-ejey="${ejey}"]`);
+                        const ELEMENTO = conseguir_elemento(ejex + x, ejey);
                         if (ELEMENTO) {
                             ELEMENTO.id = "bala" + id;
                             if (clase == 5) {
@@ -538,8 +528,8 @@ function mover_bala(id, ejex, ejey) {
 
 function verdelante_bala(nuevo_ejex, nuevo_ejey, ejex, ejey) {
     if (nuevo_ejex < TAMAÑO && nuevo_ejex >= 0 && nuevo_ejey < TAMAÑO && nuevo_ejey >= 0) {
-        const ELEMENTO = document.querySelector(`[data-ejex="${ejex}"][data-ejey="${ejey}"]`);
-        const ELEMENTO_NUEVO = document.querySelector(`[data-ejex="${nuevo_ejex}"][data-ejey="${nuevo_ejey}"]`);
+        const ELEMENTO = conseguir_elemento(ejex, ejey);
+        const ELEMENTO_NUEVO = conseguir_elemento(nuevo_ejex, nuevo_ejey);
         if (partida[nuevo_ejey][nuevo_ejex] == FUEGO) {
             ELEMENTO.classList.remove("bala1", "bala2", "bala3", "bala4");
             ELEMENTO.removeAttribute("id");
@@ -549,19 +539,19 @@ function verdelante_bala(nuevo_ejex, nuevo_ejey, ejex, ejey) {
             (ELEMENTO.textContent == FUEGO) ? partida[ejey].splice(nuevo_ejex, 1, FUEGO): partida[ejey].splice(nuevo_ejex, 1, TEXTO);
             restar_fuego();
             cambiar_fondo();
-            victoria();
+            cargar();
             return false;
         } else if (partida[nuevo_ejey][nuevo_ejex] == ENEMIGO) {
             ELEMENTO.classList.remove("bala1", "bala2", "bala3", "bala4");
             ELEMENTO.removeAttribute("id");
             ELEMENTO_NUEVO.classList.remove("enemigo");
-            partida[nuevo_ejey].splice(nuevo_ejex, 1, FUEGO);
             partida[ejey].splice(ejex, 1, TEXTO);
+            partida[nuevo_ejey].splice(nuevo_ejex, 1, TEXTO);
             enemigos_derrotados++;
             ENEMIGOS.textContent = enemigos_derrotados;
             sumar_fuego();
             cambiar_fondo();
-            generar_fuego_de_enemigo(nuevo_ejey, nuevo_ejex);
+            cargar();
             return false;
         }
         cargar();
@@ -590,26 +580,26 @@ function esparcir_fuego() {
                     if ((x == -1 && y == -1) || (x == 1 && y == 1) || (x == -1 && y == 1) || (x == 1 && y == -1)) {
                         continue;
                     }
-                    const ELEMENTO = document.querySelector(`[data-ejex="${ejex + x}"][data-ejey="${ejey + y}"]`);
+                    const ELEMENTO = conseguir_elemento(ejex + x, ejey + y);
                     if (ELEMENTO) {
                         if (!ELEMENTO.dataset.visto) {
-                            if (ELEMENTO.textContent == PROTA) {
+                            if (partida[ejey + y][ejex + x] == PROTA) {
                                 partida[ejey + y].splice(ejex + x, 1, FUEGO);
                                 ELEMENTO.removeAttribute("id");
                                 ELEMENTO.style.removeProperty("transform");
                                 ELEMENTO.dataset.visto = "visto";
                                 direccion = 'norte';
                                 daño = true;
+                                sumar_fuego();
                                 spawnear_jugador();
-
                                 continue;
                             }
-                            else if (ELEMENTO.textContent == PISTOLA) {
+                            else if (partida[ejey + y][ejex + x] == PISTOLA) {
                                 ELEMENTO.textContent = TEXTO;
                                 ELEMENTO.removeAttribute("id");
                                 insertar_pistola();
                             } 
-                            else if (ELEMENTO.textContent == BALA) {
+                            else if (partida[ejey + y][ejex + x] == BALA) {
                                 ELEMENTO.textContent = TEXTO;
                                 ELEMENTO.removeAttribute("id");
                                 ELEMENTO.classList.remove("bala1", "bala2", "bala3", "bala4");
@@ -632,7 +622,7 @@ function esparcir_fuego() {
         cambiar_fondo();
         cargar();
         esparcir_fuego();
-    }, VELOCIDAD_FUEGO);
+    }, velocidad_fuego);
 }
 
 
@@ -640,30 +630,34 @@ function esparcir_fuego() {
 
 function cambiar_fondo() {
     const FONDO = document.getElementById("body");
+    if (casillas_quemadas > 350) {
+        FONDO.style.background = "linear-gradient(rgba(248, 8, 8, 0.81),rgba(255, 123, 0, 0.81),rgba(252, 227, 1, 0.87)) , url(../img/fondowebp.webp)";
+        FONDO.style.backgroundPosition = "center";
+        FONDO.style.backgroundSize = "cover";
+        return;
+    }
+    if (casillas_quemadas > 300) {
+        FONDO.style.background = "linear-gradient(rgba(214, 26, 26, 0.73),rgba(214, 112, 17, 0.8),rgba(231, 210, 20, 0.74)) , url(../img/fondowebp.webp)";
+        FONDO.style.backgroundPosition = "center";
+        FONDO.style.backgroundSize = "cover";
+        return;
+    }
+    if (casillas_quemadas > 200) {
+        FONDO.style.background = "linear-gradient(rgba(212, 43, 43, 0.57),rgba(214, 112, 17, 0.62),rgba(231, 210, 20, 0.6)) , url(../img/fondowebp.webp)";
+        FONDO.style.backgroundPosition = "center";
+        FONDO.style.backgroundSize = "cover";
+        return;
+    }
     if (casillas_quemadas > 100) {
         FONDO.style.background = "linear-gradient(rgba(255, 83, 83, 0.464),rgba(214, 112, 17, 0.46),rgba(231, 210, 20, 0.46)) , url(../img/fondowebp.webp)";
         FONDO.style.backgroundPosition = "center";
         FONDO.style.backgroundSize = "cover";
+        return;
     }
-    else if (casillas_quemadas > 200) {
-        FONDO.style.background = "linear-gradient(rgba(212, 43, 43, 0.57),rgba(214, 112, 17, 0.62),rgba(231, 210, 20, 0.6)) , url(../img/fondowebp.webp)";
-        FONDO.style.backgroundPosition = "center";
-        FONDO.style.backgroundSize = "cover";
-    }
-    else if (casillas_quemadas > 300) {
-        FONDO.style.background = "linear-gradient(rgba(214, 26, 26, 0.73),rgba(214, 112, 17, 0.8),rgba(231, 210, 20, 0.74)) , url(../img/fondowebp.webp)";
-        FONDO.style.backgroundPosition = "center";
-        FONDO.style.backgroundSize = "cover";
-    }
-    else if (casillas_quemadas > 350) {
-        FONDO.style.background = "linear-gradient(rgba(248, 8, 8, 0.81),rgba(255, 123, 0, 0.81),rgba(252, 227, 1, 0.87)) , url(../img/fondowebp.webp)";
-        FONDO.style.backgroundPosition = "center";
-        FONDO.style.backgroundSize = "cover";
-    } else {
-        FONDO.style.background = "linear-gradient(rgba(255, 255, 255, 0.464), rgba(0, 128, 0, 0.53)), url(../img/fondowebp.webp)";
-        FONDO.style.backgroundPosition = "center";
-        FONDO.style.backgroundSize = "cover";
-    }
+    FONDO.style.background = "linear-gradient(rgba(255, 255, 255, 0.464), rgba(0, 128, 0, 0.53)), url(../img/fondowebp.webp)";
+    FONDO.style.backgroundPosition = "center";
+    FONDO.style.backgroundSize = "cover";
+    
 }
 
 //Funcion encargada de comprobar la vida 
@@ -704,6 +698,15 @@ function victoria() {
     }
 }
 
+function derrota() {
+    if (casillas_quemadas == (TAMAÑO * TAMAÑO) && casillas_restantes == 0) {
+        setTimeout(() => {
+            alert("No pudiste contener el incendio");
+            window.location.href = "index.html";
+        }, 1000);
+    }
+}
+
 
 //Funcion encargada de gestionar el inventario
 
@@ -724,44 +727,35 @@ function avanzar_tiempo() {
 
     setTimeout(() => {
         tiempo_de_juego++;
-        avanzar_tiempo();
         TIEMPO.textContent = tiempo_de_juego;
         if (tiempo_de_juego % RATIO_SPAWNEO == 0 && Object.keys(inventario).length !== 0) {
-            console.log("Spawneando enemigo");
             spawnear_enemigo();
         }
+        avanzar_tiempo();
     }, 1000);
 }
 
 //Funcion que spawnea un enemigo 
 
 function spawnear_enemigo() {
-    const EJE_X_RANDOM = Math.round(Math.random() * (TAMAÑO - 1));
-    const EJE_Y_RANDOM = Math.round(Math.random() * (TAMAÑO - 1));
-    console.log(partida[EJE_Y_RANDOM][EJE_X_RANDOM])
-    switch (partida[EJE_Y_RANDOM][EJE_X_RANDOM]) {
-        case PROTA:
-        case FUEGO:
-        case PISTOLA:
-        case ENEMIGO:
-            spawnear_enemigo();
-            break;
-        default:
-            partida[EJE_Y_RANDOM].splice(EJE_X_RANDOM, 1, ENEMIGO);
-            cargar();
-            break;
-
-    }
+    if (casillas_quemadas >= 350) return;
+    const LUGARES_DISPONIBLES = document.querySelectorAll(".casilla:not(.fuego):not([id])");
+    const NUM_RANDOM = Math.round(Math.random() * (LUGARES_DISPONIBLES.length - 1));
+    const LUGAR_RANDOM = LUGARES_DISPONIBLES[NUM_RANDOM];
+    const EJE_Y = parseInt(LUGAR_RANDOM.dataset.ejey);
+    const EJE_X = parseInt(LUGAR_RANDOM.dataset.ejex);
+    partida[EJE_Y].splice(EJE_X, 1, ENEMIGO);
+    LUGAR_RANDOM.id = "enemigo" + id_enemigo;
+    mover_enemigo("enemigo" + id_enemigo);
+    id_enemigo++;
+    cargar();
 }
 
-//Genera el fuego que produce un enemigo al morir
+//Función encargada de mover al enemigo
 
-function generar_fuego_de_enemigo(ejey, ejex) {
-    const ELEMENTO = document.querySelector(`[data-ejex="${ejex}"][data-ejey="${ejey}"]`);
-    ELEMENTO.classList.add("fuego");
-    ELEMENTO.dataset.visto = "visto";
+function mover_enemigo(id) {
+    const ENEMIGO = document.getElementById(id);
 }
-
 
 //Funciones encargadas de gestionar las cuentas de las casillas quemadas y restantes
 
@@ -770,6 +764,7 @@ function sumar_fuego() {
     casillas_restantes--;
     CASILLAS_QUEMADAS.textContent = casillas_quemadas;
     CASILLAS_RESTANTES.textContent = casillas_restantes;
+    derrota();
 }
 
 function restar_fuego() {
@@ -777,4 +772,11 @@ function restar_fuego() {
     casillas_restantes++;
     CASILLAS_QUEMADAS.textContent = casillas_quemadas;
     CASILLAS_RESTANTES.textContent = casillas_restantes;
+    victoria();
+}
+
+//Funcion que obtiene un elemento del DOM o null si no existe
+
+function conseguir_elemento(ejex, ejey) {
+    return document.querySelector(`[data-ejex="${ejex}"][data-ejey="${ejey}"]`);
 }
