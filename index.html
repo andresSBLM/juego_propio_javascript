@@ -65,7 +65,6 @@
         const TAMAÑO = 20;
         const MITAD = Math.floor(TAMAÑO / 2);
         var pos_fuego_inicio;
-        const RATIO_SPAWNEO = 5;
 
         //CONSTANTES HTML
         const MAIN = document.getElementById("principal");
@@ -95,13 +94,13 @@
         var equipado = "";
         var vida = 3;
         var tiempo_de_juego = 0;
-        var enemigos_derrotados = 0;
-        var ultimo_fuego = 0;
-        var velocidad_fuego = 5000;
+        var velocidad_fuego = 1550000;
 
         //VARIABLES DE LOS ENEMIGOS 
         var id_enemigo = 1;
-        const VELOCIDAD_ENEMIGO = 1000;
+        var velocidad_enemigo = 1000;
+        var ratio_spawneo = 8;
+        var enemigos_derrotados = 0;
 
         //VARIABLES DE LA PISTOLA
         const VELOCIDAD_BALA = 50;

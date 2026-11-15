@@ -192,13 +192,13 @@
     box-shadow: none;
 }
 
-#principal .casilla1.fuego {
+.casilla1.fuego {
     background: url(../img/fuego.gif);
     background-position: center;
     background-size: cover;
 }
 
-#principal .casilla2.fuego {
+.casilla2.fuego {
     background: url(../img/fuego2.gif);
     background-position: center;
     background-size: cover;

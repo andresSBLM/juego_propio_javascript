@@ -300,7 +300,9 @@ document.addEventListener('keydown', (event) => {
             }
             break;
         case ' ':
-            velocidad_fuego = 10000;
+            velocidad_fuego = 100000;
+            velocidad_enemigo = 100000;
+            ratio_spawneo = 1000;
     }
 });
 
@@ -536,7 +538,7 @@ function verdelante_bala(nuevo_ejex, nuevo_ejey, ejex, ejey) {
             ELEMENTO_NUEVO.classList.remove("fuego");
             ELEMENTO_NUEVO.removeAttribute("data-visto");
             partida[nuevo_ejey].splice(nuevo_ejex, 1, TEXTO);
-            (ELEMENTO.textContent == FUEGO) ? partida[ejey].splice(nuevo_ejex, 1, FUEGO): partida[ejey].splice(nuevo_ejex, 1, TEXTO);
+            (ELEMENTO.textContent == FUEGO) ? partida[ejey].splice(nuevo_ejex, 1, FUEGO) : partida[ejey].splice(nuevo_ejex, 1, TEXTO);
             restar_fuego();
             cambiar_fondo();
             cargar();
@@ -545,11 +547,13 @@ function verdelante_bala(nuevo_ejex, nuevo_ejey, ejex, ejey) {
             ELEMENTO.classList.remove("bala1", "bala2", "bala3", "bala4");
             ELEMENTO.removeAttribute("id");
             ELEMENTO_NUEVO.classList.remove("enemigo");
+            ELEMENTO_NUEVO.removeAttribute("id");
+            ELEMENTO_NUEVO.style.removeProperty("transform");
+            ELEMENTO_NUEVO.dataset.visto = "visto";
             partida[ejey].splice(ejex, 1, TEXTO);
-            partida[nuevo_ejey].splice(nuevo_ejex, 1, TEXTO);
+            partida[nuevo_ejey].splice(nuevo_ejex, 1, FUEGO);
             enemigos_derrotados++;
             ENEMIGOS.textContent = enemigos_derrotados;
-            sumar_fuego();
             cambiar_fondo();
             cargar();
             return false;
@@ -558,7 +562,7 @@ function verdelante_bala(nuevo_ejex, nuevo_ejey, ejex, ejey) {
         return true;
 
     } else {
-        (partida[ejey][ejex] == FUEGO)? partida[ejey].splice(ejex, 1, FUEGO) : partida[ejey].splice(ejex, 1, TEXTO);
+        (partida[ejey][ejex] == FUEGO) ? partida[ejey].splice(ejex, 1, FUEGO) : partida[ejey].splice(ejex, 1, TEXTO);
         const ULTIMO_ELEMENTO = document.querySelector(`[data-ejex="${ejex}"][data-ejey="${ejey}"]`);
         ULTIMO_ELEMENTO.removeAttribute("id");
         ULTIMO_ELEMENTO.classList.remove("bala1", "bala2", "bala3", "bala4");
@@ -594,15 +598,13 @@ function esparcir_fuego() {
                                 spawnear_jugador();
                                 continue;
                             }
-                            else if (partida[ejey + y][ejex + x] == PISTOLA) {
-                                ELEMENTO.textContent = TEXTO;
-                                ELEMENTO.removeAttribute("id");
-                                insertar_pistola();
-                            } 
                             else if (partida[ejey + y][ejex + x] == BALA) {
                                 ELEMENTO.textContent = TEXTO;
                                 ELEMENTO.removeAttribute("id");
                                 ELEMENTO.classList.remove("bala1", "bala2", "bala3", "bala4");
+                            } else if (partida[ejey + y][ejex + x] == ENEMIGO) {
+
+                                continue;
                             }
                             ELEMENTO.textContent = FUEGO;
                             ELEMENTO.dataset.visto = "visto";
@@ -657,7 +659,7 @@ function cambiar_fondo() {
     FONDO.style.background = "linear-gradient(rgba(255, 255, 255, 0.464), rgba(0, 128, 0, 0.53)), url(../img/fondowebp.webp)";
     FONDO.style.backgroundPosition = "center";
     FONDO.style.backgroundSize = "cover";
-    
+
 }
 
 //Funcion encargada de comprobar la vida 
@@ -728,7 +730,7 @@ function avanzar_tiempo() {
     setTimeout(() => {
         tiempo_de_juego++;
         TIEMPO.textContent = tiempo_de_juego;
-        if (tiempo_de_juego % RATIO_SPAWNEO == 0 && Object.keys(inventario).length !== 0) {
+        if (tiempo_de_juego % ratio_spawneo == 0 && Object.keys(inventario).length !== 0) {
             spawnear_enemigo();
         }
         avanzar_tiempo();
@@ -738,7 +740,8 @@ function avanzar_tiempo() {
 //Funcion que spawnea un enemigo 
 
 function spawnear_enemigo() {
-    if (casillas_quemadas >= 350) return;
+    if (casillas_quemadas >= 300) return;
+    sumar_fuego();
     const LUGARES_DISPONIBLES = document.querySelectorAll(".casilla:not(.fuego):not([id])");
     const NUM_RANDOM = Math.round(Math.random() * (LUGARES_DISPONIBLES.length - 1));
     const LUGAR_RANDOM = LUGARES_DISPONIBLES[NUM_RANDOM];
@@ -751,10 +754,144 @@ function spawnear_enemigo() {
     cargar();
 }
 
+//Función encargada de ver delante del enemigo
+
+function verdelante_enemigo(ejex, ejey) {
+    switch (partida[ejey][ejex]) {
+        case ENEMIGO:
+            return false;
+        case TEXTO:
+            sumar_fuego();
+            return true;
+        case PROTA:
+            return false;
+        default:
+            return true;
+    }
+}
+
+
 //Función encargada de mover al enemigo
 
 function mover_enemigo(id) {
-    const ENEMIGO = document.getElementById(id);
+    setTimeout(() => {
+        var movimiento_x;
+        var movimiento_y;
+        var desplazamiento_random;
+        const EL_ENEMIGO = document.getElementById(id);
+        if (!EL_ENEMIGO) return;
+        const EJE_X_ENEMIGO = parseInt(EL_ENEMIGO.dataset.ejex);
+        const EJE_Y_ENEMIGO = parseInt(EL_ENEMIGO.dataset.ejey);
+        const JUGADOR = document.getElementById("protagonista");
+        const EJE_X_JUGADOR = parseInt(JUGADOR.dataset.ejex);
+        const EJE_Y_JUGADOR = parseInt(JUGADOR.dataset.ejey);
+
+        if (EJE_X_ENEMIGO > EJE_X_JUGADOR) {
+            movimiento_x = 'este';
+        } else if (EJE_X_ENEMIGO < EJE_X_JUGADOR) {
+            movimiento_x = 'oeste';
+        }
+        if (EJE_Y_ENEMIGO > EJE_Y_JUGADOR) {
+            movimiento_y = 'norte';
+        } else if (EJE_Y_ENEMIGO < EJE_Y_JUGADOR) {
+            movimiento_y = 'sur';
+        }
+        
+        if (movimiento_x && movimiento_y) {
+            desplazamiento_random = Math.floor(Math.random() * 2);
+        } else if (movimiento_x) {
+            desplazamiento_random = 0;
+        } else {
+            desplazamiento_random = 1;
+        }
+        const ELEMENTO = conseguir_elemento(EJE_X_ENEMIGO, EJE_Y_ENEMIGO);
+        if (!ELEMENTO) return;
+        switch (desplazamiento_random) {
+            case 0:
+                switch (movimiento_x) {
+                    case 'este':
+                        const NUEVO_EJE_X_ENEMIGO_E = EJE_X_ENEMIGO - 1;
+                        if (!verdelante_enemigo(NUEVO_EJE_X_ENEMIGO_E, EJE_Y_ENEMIGO)) {
+                            mover_enemigo(id);
+                            return;
+                        }
+                        ELEMENTO.classList.remove("enemigo");
+                        ELEMENTO.removeAttribute("id");
+                        ELEMENTO.style.removeProperty("transform");
+                        ELEMENTO.dataset.visto = "visto";
+                        partida[EJE_Y_ENEMIGO].splice(EJE_X_ENEMIGO, 1, FUEGO);
+                        const NUEVO_ELEMENTO_E = conseguir_elemento(NUEVO_EJE_X_ENEMIGO_E, EJE_Y_ENEMIGO);
+                        partida[EJE_Y_ENEMIGO].splice(NUEVO_EJE_X_ENEMIGO_E, 1, ENEMIGO);
+                        NUEVO_ELEMENTO_E.id = id;
+                        NUEVO_ELEMENTO_E.classList.add("enemigo");
+                        NUEVO_ELEMENTO_E.style.transform = "rotate(90deg)";
+                        cargar();
+                        break;
+                    case 'oeste':
+                        const NUEVO_EJE_X_ENEMIGO_O = EJE_X_ENEMIGO + 1;
+                        if (!verdelante_enemigo(NUEVO_EJE_X_ENEMIGO_O, EJE_Y_ENEMIGO)) {
+                            mover_enemigo(id);
+                            return;
+                        }
+                        ELEMENTO.classList.remove("enemigo");
+                        ELEMENTO.removeAttribute("id");
+                        ELEMENTO.style.removeProperty("transform");
+                        ELEMENTO.dataset.visto = "visto";
+                        partida[EJE_Y_ENEMIGO].splice(EJE_X_ENEMIGO, 1, FUEGO);
+                        const NUEVO_ELEMENTO_O = conseguir_elemento(NUEVO_EJE_X_ENEMIGO_O, EJE_Y_ENEMIGO);
+                        partida[EJE_Y_ENEMIGO].splice(NUEVO_EJE_X_ENEMIGO_O, 1, ENEMIGO);
+                        NUEVO_ELEMENTO_O.id = id;
+                        NUEVO_ELEMENTO_O.classList.add("enemigo");
+                        NUEVO_ELEMENTO_O.style.transform = "rotate(-90deg)";
+                        cargar();
+                        break;
+                }
+                break;
+            case 1:
+                switch (movimiento_y) {
+                    case 'sur':
+                        const NUEVO_EJE_Y_ENEMIGO_S = EJE_Y_ENEMIGO + 1;
+                        if (!verdelante_enemigo(EJE_X_ENEMIGO, NUEVO_EJE_Y_ENEMIGO_S)) {
+                            mover_enemigo(id);
+                            return;
+                        }
+                        ELEMENTO.classList.remove("enemigo");
+                        ELEMENTO.removeAttribute("id");
+                        ELEMENTO.style.removeProperty("transform");
+                        ELEMENTO.dataset.visto = "visto";
+                        partida[EJE_Y_ENEMIGO].splice(EJE_X_ENEMIGO, 1, FUEGO);
+                        const NUEVO_ELEMENTO_S = conseguir_elemento(EJE_X_ENEMIGO, NUEVO_EJE_Y_ENEMIGO_S);
+                        partida[NUEVO_EJE_Y_ENEMIGO_S].splice(EJE_X_ENEMIGO, 1, ENEMIGO);
+                        NUEVO_ELEMENTO_S.id = id;
+                        NUEVO_ELEMENTO_S.classList.add("enemigo");
+                        NUEVO_ELEMENTO_S.style.transform = "rotate(0deg)";
+                        cargar();
+                        break;
+
+                    case 'norte':
+                        const NUEVO_EJE_Y_ENEMIGO_N = EJE_Y_ENEMIGO - 1;
+                        if (!verdelante_enemigo(EJE_X_ENEMIGO, NUEVO_EJE_Y_ENEMIGO_N)) {
+                            mover_enemigo(id);
+                            return;
+                        }
+                        ELEMENTO.classList.remove("enemigo");
+                        ELEMENTO.removeAttribute("id");
+                        ELEMENTO.style.removeProperty("transform");
+                        ELEMENTO.dataset.visto = "visto";
+                        partida[EJE_Y_ENEMIGO].splice(EJE_X_ENEMIGO, 1, FUEGO);
+                        const NUEVO_ELEMENTO_N = conseguir_elemento(EJE_X_ENEMIGO, NUEVO_EJE_Y_ENEMIGO_N);
+                        partida[NUEVO_EJE_Y_ENEMIGO_N].splice(EJE_X_ENEMIGO, 1, ENEMIGO);
+                        NUEVO_ELEMENTO_N.id = id;
+                        NUEVO_ELEMENTO_N.classList.add("enemigo");
+                        NUEVO_ELEMENTO_N.style.transform = "rotate(180deg)";
+                        cargar();
+                        break;
+                }
+                break;
+        }
+        mover_enemigo(id);
+    }, velocidad_enemigo);
+
 }
 
 //Funciones encargadas de gestionar las cuentas de las casillas quemadas y restantes
