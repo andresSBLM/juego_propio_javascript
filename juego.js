@@ -253,10 +253,16 @@ function mover() {
 }
 
 document.addEventListener('keydown', (event) => {
+    const PROTAGONISTA = document.getElementById("protagonista");
+    if (!PROTAGONISTA) return;
     if (vida > 0) {
-
         switch (event.key) {
             case 'ArrowUp':
+                if (!(equipado == "pistola")) return;
+                PROTAGONISTA.style.transform = "rotate(180deg)";
+                direccion = 'norte';
+                crear_bala();
+                break;
             case 'w':
             case 'W':
                 direccion = 'norte';
@@ -264,6 +270,11 @@ document.addEventListener('keydown', (event) => {
                 mover();
                 break;
             case 'ArrowDown':
+                if (!(equipado == "pistola")) return;
+                PROTAGONISTA.style.transform = "rotate(0deg)";
+                direccion = 'sur';
+                crear_bala();
+                break;
             case 's':
             case 'S':
                 direccion = 'sur';
@@ -271,6 +282,11 @@ document.addEventListener('keydown', (event) => {
                 mover();
                 break;
             case 'ArrowLeft':
+                if (!(equipado == "pistola")) return;
+                PROTAGONISTA.style.transform = "rotate(90deg)";
+                direccion = 'este';
+                crear_bala();
+                break;
             case 'a':
             case 'A':
                 direccion = 'este';
@@ -278,6 +294,11 @@ document.addEventListener('keydown', (event) => {
                 mover();
                 break;
             case 'ArrowRight':
+                if (!(equipado == "pistola")) return;
+                PROTAGONISTA.style.transform = "rotate(-90deg)";
+                direccion = 'oeste';
+                crear_bala();
+                break;
             case 'd':
             case 'D':
                 direccion = 'oeste';
@@ -303,7 +324,7 @@ document.addEventListener('keydown', (event) => {
                 }
                 break;
 
-                case '2':
+            case '2':
                 if (Object.keys(inventario).length > 1) {
                     if (!equipado) {
                         SLOTS_INVENTARIO[1].classList.add("equipado");
@@ -355,8 +376,19 @@ document.addEventListener('keydown', (event) => {
     switch (event.key) {
         case 'q':
         case 'Q':
-            if (equipado == "pistola") {
-                crear_bala();
+            if (equipado == "vendas") {
+                if (vida < 3 && vida > 0) {
+                    const SLOT_EQUIPADO = document.querySelector(".equipado");
+                    const FOTO = SLOT_EQUIPADO.lastElementChild;
+                    SLOT_EQUIPADO.classList.remove("equipado");
+                    FOTO.classList.remove("foto_objeto");
+                    FOTO.removeAttribute("src");
+                    equipado = "";
+                    delete inventario.vendas;
+                    vida++;
+                    comprobar_vida();
+                    cargar_inventario()
+                }
             }
             break;
         case ' ':
@@ -662,6 +694,7 @@ function verdelante_bala(nuevo_ejex, nuevo_ejey, ejex, ejey) {
             ELEMENTO.classList.remove("bala1", "bala2", "bala3", "bala4");
             ELEMENTO_NUEVO.classList.remove("fuego");
             ELEMENTO_NUEVO.removeAttribute("data-visto");
+            partida[ejey].splice(ejex, 1, TEXTO);
             partida[nuevo_ejey].splice(nuevo_ejex, 1, TEXTO);
             restar_fuego();
             cambiar_fondo();
@@ -690,7 +723,7 @@ function verdelante_bala(nuevo_ejex, nuevo_ejey, ejex, ejey) {
             cargar();
             return false;
         }
-        
+
         cargar();
         return true;
 
