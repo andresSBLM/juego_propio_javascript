@@ -294,13 +294,32 @@ document.addEventListener('keydown', (event) => {
                             SLOTS_INVENTARIO[0].classList.remove("equipado");
                             equipado = "";
                         } else {
-                            alert(5);
-                            const SLOT_EQUIPADO = document.getElementsByClassName("equipado");
+                            const SLOT_EQUIPADO = document.querySelector(".equipado")
                             SLOT_EQUIPADO.classList.remove("equipado");
                             SLOTS_INVENTARIO[0].classList.add("equipado");
                             equipado = Object.keys(inventario)[0];
                         }
                     }
+                }
+                break;
+
+                case '2':
+                if (Object.keys(inventario).length > 1) {
+                    if (!equipado) {
+                        SLOTS_INVENTARIO[1].classList.add("equipado");
+                        equipado = Object.keys(inventario)[1];
+                    } else {
+                        if (SLOTS_INVENTARIO[1].classList.contains("equipado")) {
+                            SLOTS_INVENTARIO[1].classList.remove("equipado");
+                            equipado = "";
+                        } else {
+                            const SLOT_EQUIPADO = document.querySelector(".equipado")
+                            SLOT_EQUIPADO.classList.remove("equipado");
+                            SLOTS_INVENTARIO[1].classList.add("equipado");
+                            equipado = Object.keys(inventario)[1];
+                        }
+                    }
+                    break;
                 }
         }
     }
@@ -315,6 +334,19 @@ document.addEventListener('click', () => {
 
     if (equipado == "pistola") {
         crear_bala();
+    } else if (equipado == "vendas") {
+        if (vida < 3 && vida > 0) {
+            const SLOT_EQUIPADO = document.querySelector(".equipado");
+            const FOTO = SLOT_EQUIPADO.lastElementChild;
+            SLOT_EQUIPADO.classList.remove("equipado");
+            FOTO.classList.remove("foto_objeto");
+            FOTO.removeAttribute("src");
+            equipado = "";
+            delete inventario.vendas;
+            vida++;
+            comprobar_vida();
+            cargar_inventario()
+        }
     }
 });
 
@@ -331,6 +363,8 @@ document.addEventListener('keydown', (event) => {
             velocidad_fuego = 10000;
             velocidad_enemigo = 10000;
             ratio_spawneo = 10;
+            inventario.vendas = objetos.vendas;
+            cargar_inventario();
     }
 });
 
