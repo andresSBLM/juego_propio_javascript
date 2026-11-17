@@ -136,21 +136,18 @@ function verdireccion() {
     switch (direccion) {
         case 'norte':
             g = grados_rotacion.norte;
-            protagonista.style.transform = `rotate(${g}deg)`;
             break;
         case 'sur':
             g = grados_rotacion.sur;
-            protagonista.style.transform = `rotate(${g}deg)`;
             break;
         case 'este':
             g = grados_rotacion.este;
-            protagonista.style.transform = `rotate(${g}deg)`;
             break;
         case 'oeste':
             g = grados_rotacion.oeste;
-            protagonista.style.transform = `rotate(${g}deg)`;
             break;
     }
+    protagonista.style.transform = `rotate(${g}deg)`;
 }
 
 //Funcion encargada de comprobar y devolver que hay delante del proximo movimiento
@@ -199,14 +196,17 @@ function verdelante(ejex, ejey) {
 
 function mover() {
     protagonista = document.getElementById("protagonista");
+    if (!protagonista) return;
     protagonista.removeAttribute("id");
     protagonista.style.removeProperty("transform");
     partida[player_array].splice(player_position, 1, texto_pisado);
-
+    var nuevo_array;
+    var nueva_posicion;
 
     switch (direccion) {
         case 'norte':
-            const NUEVO_ARRAY_N = player_array - 1;
+            nuevo_array = player_array - 1;
+            nueva_posicion = player_position;
             if (NUEVO_ARRAY_N == -1 || !(verdelante(player_position, NUEVO_ARRAY_N))) {
                 partida[player_array].splice(player_position, 1, PROTA);
                 break;
