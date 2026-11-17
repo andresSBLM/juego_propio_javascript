@@ -74,10 +74,9 @@ function insertar_jugador() {
 function spawnear_jugador() {
     cargar();
     const LUGARES_DISPONIBLES = document.querySelectorAll(".casilla:not(.fuego):not([id])");
-    if (!LUGARES_DISPONIBLES) return;
-    const NUM_RANDOM = Math.floor(Math.random() * (LUGARES_DISPONIBLES.length - 1));
+    if (LUGARES_DISPONIBLES.length === 0) return;
+    const NUM_RANDOM = Math.floor(Math.random() * (LUGARES_DISPONIBLES.length));
     const LUGAR_RANDOM = LUGARES_DISPONIBLES[NUM_RANDOM];
-    if (!LUGAR_RANDOM) return;
     const EJE_Y = parseInt(LUGAR_RANDOM.dataset.ejey);
     const EJE_X = parseInt(LUGAR_RANDOM.dataset.ejex);
     partida[EJE_Y].splice(EJE_X, 1, PROTA);
@@ -121,13 +120,12 @@ function insertar_fuego() {
 //Función que inserta la pistola de agua 
 
 function insertar_pistola() {
-    const array_random = Math.round(Math.random() * (TAMAÑO - 1));
-    const posicion_random = Math.round(Math.random() * (TAMAÑO - 1));
+    const array_random = Math.floor(Math.random() * (TAMAÑO));
+    const posicion_random = Math.floor(Math.random() * (TAMAÑO));
     if (partida[array_random][posicion_random] == TEXTO) {
         partida[array_random][posicion_random] = PISTOLA;
     } else {
         insertar_pistola();
-        return;
     }
 }
 
@@ -236,7 +234,6 @@ function mover() {
             break;
         case 'oeste':
             const NUEVA_POS_O = player_position + 1;
-            console.log(NUEVA_POS_O);
             if (NUEVA_POS_O == TAMAÑO || !(verdelante(NUEVA_POS_O, player_array))) {
                 partida[player_array].splice(player_position, 1, PROTA);
                 break;
@@ -245,8 +242,6 @@ function mover() {
             player_position++;
             break;
     }
-
-    console.log("Array: " + player_array + " Posicion: " + player_position);
     cargar();
     protagonista = document.getElementById("protagonista");
     verdireccion();
@@ -266,7 +261,6 @@ document.addEventListener('keydown', (event) => {
             case 'w':
             case 'W':
                 direccion = 'norte';
-                console.log("Moviendo hacia " + direccion)
                 mover();
                 break;
             case 'ArrowDown':
@@ -278,7 +272,6 @@ document.addEventListener('keydown', (event) => {
             case 's':
             case 'S':
                 direccion = 'sur';
-                console.log("Moviendo hacia " + direccion)
                 mover();
                 break;
             case 'ArrowLeft':
@@ -290,7 +283,6 @@ document.addEventListener('keydown', (event) => {
             case 'a':
             case 'A':
                 direccion = 'este';
-                console.log("Moviendo hacia " + direccion)
                 mover();
                 break;
             case 'ArrowRight':
@@ -302,7 +294,6 @@ document.addEventListener('keydown', (event) => {
             case 'd':
             case 'D':
                 direccion = 'oeste';
-                console.log("Moviendo hacia " + direccion)
                 mover();
                 break;
             case '1':
@@ -442,6 +433,7 @@ function crear_bala() {
                 id_bala++;
                 break;
             }
+            break;
         case 'sur':
             const NUEVO_ARRAY_S = ARRAY_ACTUAL + 1;
             const ELEMENTO_S = conseguir_elemento(POSICION_ACTUAL, NUEVO_ARRAY_S);
@@ -471,7 +463,7 @@ function crear_bala() {
                 id_bala++;
                 break;
             }
-
+            break;
         case 'este':
             const NUEVO_ANCHO_E = POSICION_ACTUAL - 1;
             const ELEMENTO_E = conseguir_elemento(NUEVO_ANCHO_E, ARRAY_ACTUAL);
@@ -501,7 +493,7 @@ function crear_bala() {
                 id_bala++;
                 break;
             }
-
+            break;
         case 'oeste':
             const NUEVO_ANCHO_O = POSICION_ACTUAL + 1;
             const ELEMENTO_O = conseguir_elemento(NUEVO_ANCHO_O, ARRAY_ACTUAL);
@@ -531,6 +523,7 @@ function crear_bala() {
                 id_bala++;
                 break;
             }
+            break;
     }
 }
 
@@ -908,9 +901,10 @@ function avanzar_tiempo() {
 
 function spawnear_enemigo() {
     if (casillas_quemadas >= 300) return;
-    sumar_fuego();
     const LUGARES_DISPONIBLES = document.querySelectorAll(".casilla:not(.fuego):not([id])");
-    const NUM_RANDOM = Math.round(Math.random() * (LUGARES_DISPONIBLES.length - 1));
+    if (LUGARES_DISPONIBLES.length === 0) return;
+    sumar_fuego();
+    const NUM_RANDOM = Math.floor(Math.random() * (LUGARES_DISPONIBLES.length));
     const LUGAR_RANDOM = LUGARES_DISPONIBLES[NUM_RANDOM];
     const EJE_Y = parseInt(LUGAR_RANDOM.dataset.ejey);
     const EJE_X = parseInt(LUGAR_RANDOM.dataset.ejex);
