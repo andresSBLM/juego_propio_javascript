@@ -116,6 +116,40 @@ function insertar_fuego() {
     sumar_fuego();
 }
 
+//Funcion encargada de insertar aleatoriamente fuego en los bordes
+
+function spawnear_fuego() {
+    const PARED_RANDOM = Math.floor(Math.random() * 5);
+    const POSICION = Math.floor(Math.random() * TAMAÑO);
+    var nuevo_array;
+    var nueva_posicion;
+    switch (PARED_RANDOM) {
+        case 1:
+            nueva_posicion = 0;
+            nuevo_array = POSICION;
+            break;
+        case 2:
+            nueva_posicion = POSICION;
+            nuevo_array = 0;
+            break;
+        case 3:
+            nueva_posicion = TAMAÑO - 1;
+            nuevo_array = POSICION;
+            break;
+        case 4:
+            nueva_posicion = POSICION;
+            nuevo_array = TAMAÑO - 1;
+            break;
+    }
+    const ELEMENTO = conseguir_elemento(nueva_posicion, nuevo_array);
+    if (!ELEMENTO) return;
+    if (partida[nuevo_array][nueva_posicion] !== TEXTO) return;
+    ELEMENTO.classList.add("fuego");
+    ELEMENTO.dataset.visto = "visto";
+    partida[nuevo_array].splice(nueva_posicion, 1, FUEGO);
+    sumar_fuego();
+}
+
 
 //Función que inserta la pistola de agua 
 
@@ -170,6 +204,16 @@ function verdelante(ejex, ejey) {
             ELEMENTO.textContent = TEXTO;
             partida[ejey][ejex] = TEXTO;
             inventario.pistola = objetos.pistola;
+            cargar_inventario();
+            insertar_fuego();
+            esparcir_fuego();
+            break;
+        case PLASM_CANON:
+            avanzar = false;
+            ELEMENTO.removeAttribute("id");
+            ELEMENTO.textContent = TEXTO;
+            partida[ejey][ejex] = TEXTO;
+            inventario.plasm_canon = objetos.plasm_canon;
             cargar_inventario();
             insertar_fuego();
             esparcir_fuego();
@@ -254,29 +298,54 @@ function mover() {
 document.addEventListener('keydown', event => {
     const PROTAGONISTA = document.getElementById("protagonista");
     if (!PROTAGONISTA) return;
-    if (!(equipado == "pistola")) return;
     if (vida <= 0) return;
-    switch (event.key) {
-        case 'ArrowUp':
-            PROTAGONISTA.style.transform = "rotate(180deg)";
-            direccion = 'norte';
-            crear_bala();
-            break;
-        case 'ArrowDown':
-            PROTAGONISTA.style.transform = "rotate(0deg)";
-            direccion = 'sur';
-            crear_bala();
-            break;
-        case 'ArrowLeft':
-            PROTAGONISTA.style.transform = "rotate(90deg)";
-            direccion = 'este';
-            crear_bala();
-            break;
-        case 'ArrowRight':
-            PROTAGONISTA.style.transform = "rotate(-90deg)";
-            direccion = 'oeste';
-            crear_bala();
-            break;
+    if (equipado == "pistola") {
+
+        switch (event.key) {
+            case 'ArrowUp':
+                PROTAGONISTA.style.transform = "rotate(180deg)";
+                direccion = 'norte';
+                crear_bala();
+                break;
+            case 'ArrowDown':
+                PROTAGONISTA.style.transform = "rotate(0deg)";
+                direccion = 'sur';
+                crear_bala();
+                break;
+            case 'ArrowLeft':
+                PROTAGONISTA.style.transform = "rotate(90deg)";
+                direccion = 'este';
+                crear_bala();
+                break;
+            case 'ArrowRight':
+                PROTAGONISTA.style.transform = "rotate(-90deg)";
+                direccion = 'oeste';
+                crear_bala();
+                break;
+        }
+    } else if (equipado == "canon_plasm") {
+        switch (event.key) {
+            case 'ArrowUp':
+                PROTAGONISTA.style.transform = "rotate(180deg)";
+                direccion = 'norte';
+                crear_plasm_bullet();
+                break;
+            case 'ArrowDown':
+                PROTAGONISTA.style.transform = "rotate(0deg)";
+                direccion = 'sur';
+                crear_plasm_bullet();
+                break;
+            case 'ArrowLeft':
+                PROTAGONISTA.style.transform = "rotate(90deg)";
+                direccion = 'este';
+                crear_plasm_bullet();
+                break;
+            case 'ArrowRight':
+                PROTAGONISTA.style.transform = "rotate(-90deg)";
+                direccion = 'oeste';
+                crear_plasm_bullet();
+                break;
+        }
     }
 });
 
@@ -560,6 +629,10 @@ function verdelante_bala(nuevo_ejex, nuevo_ejey, ejex, ejey) {
             partida[ejey].splice(ejex, 1, TEXTO);
             cargar();
             return false;
+        } else if (partida[nuevo_ejey][nuevo_ejex] == PLASM_CANON) {
+            partida[ejey].splice(ejex, 1, TEXTO);
+            cargar();
+            return false;
         }
 
         cargar();
@@ -724,6 +797,9 @@ function avanzar_tiempo() {
         if (tiempo_de_juego % ratio_spawneo == 0 && Object.keys(inventario).length !== 0) {
             spawnear_enemigo();
         }
+        if (tiempo_de_juego % velocidad_spawn_fuego == 0 && Object.keys(inventario).length !== 0) {
+            spawnear_fuego();
+        }
         avanzar_tiempo();
     }, 1000);
 }
@@ -862,7 +938,14 @@ function mover_enemigo(id) {
 
 function dropear_objeto(ejex, ejey) {
     const NUMERO_RANDOM = Math.floor(Math.random() * 101);
-    if (NUMERO_RANDOM <= 10 && !inventario.vendas) {
+    if (NUMERO_RANDOM <= 80 && !inventario.plasm_canon && !document.getElementById("id_plasm_canon")) {
+        partida[ejey].splice(ejex, 1, PLASM_CANON);
+        const ELEMENTO = conseguir_elemento(ejex, ejey);
+        ELEMENTO.id = "id_plasm_canon";
+        ELEMENTO.classList.remove("fuego");
+        ELEMENTO.removeAttribute("data-visto");
+        restar_fuego();
+    } else if (NUMERO_RANDOM <= 10 && !inventario.vendas && !document.getElementById("id_vendas")) {
         partida[ejey].splice(ejex, 1, VENDAS);
         const ELEMENTO = conseguir_elemento(ejex, ejey);
         ELEMENTO.id = "id_vendas";
@@ -896,3 +979,33 @@ function conseguir_elemento(ejex, ejey) {
     return document.querySelector(`[data-ejex="${ejex}"][data-ejey="${ejey}"]`);
 }
 
+function crear_plasm_bullet() {
+    const EL_PROTA = document.getElementById("EL_PROTA");
+    if (!EL_PROTA) return;
+    const EJE_X_PROTA = parseInt(EL_PROTA.dataset.ejex);
+    const EJE_Y_PROTA = parseInt(EL_PROTA.dataset.ejey);
+    var nuevo_array;
+    var nueva_posicion;
+    switch (direccion) {
+        case 'norte':
+            nueva_posicion = EJE_X_PROTA - 1;
+            nuevo_array = EJE_Y_PROTA;
+            for (let x = 0; x < TAMAÑO; X++) {
+                const ELEMENTO = conseguir_elemento(nueva_posicion - x, nuevo_array);
+                if (!ELEMENTO) return;
+            }
+            break;
+        case 'sur':
+            nueva_posicion = EJE_X_PROTA + 1;
+            nuevo_array = EJE_Y_PROTA;
+            break;
+        case 'este':
+            nueva_posicion = EJE_X_PROTA;
+            nuevo_array = EJE_Y_PROTA - 1;
+            break;
+        case 'oeste':
+            nueva_posicion = EJE_X_PROTA;
+            nuevo_array = EJE_Y_PROTA + 1;
+            break;
+    }
+}

@@ -62,7 +62,9 @@
         const FUEGO = "x";
         const PISTOLA = "1";
         const VENDAS = "2";
+        const PLASM_CANON = "3";
         const BALA = "o";
+        const PLASM_BULLET = "O";
         const TAMAÑO = 20;
         const MITAD = Math.floor(TAMAÑO / 2);
         var pos_fuego_inicio;
@@ -89,18 +91,20 @@
         var casillas_restantes = TAMAÑO * TAMAÑO;
         var objetos = {
             'pistola': '../img/pistola.avif',
-            'vendas': '../img/venda.jpeg'
+            'vendas': '../img/venda.jpeg',
+            'plasm_canon': '../img/plasm_canon.png'
         }
         var inventario = {};
         var equipado = "";
         var vida = 3;
         var tiempo_de_juego = 0;
-        var velocidad_fuego = 3000;
+        var velocidad_fuego = 10000;
+        var velocidad_spawn_fuego = 2;
 
         //VARIABLES DE LOS ENEMIGOS 
         var id_enemigo = 1;
         var velocidad_enemigo = 2000;
-        var ratio_spawneo = 5;
+        var ratio_spawneo = 2;
         var enemigos_derrotados = 0;
 
         //VARIABLES DE LA PISTOLA

@@ -218,6 +218,13 @@
     background-repeat: no-repeat;
 }
 
+#principal #id_plasm_canon {
+    background: linear-gradient(rgba(0, 0, 255, 0.342), rgba(255, 255, 255, 0.301)), url(../img/plasm_canon.png);
+    background-position: center;
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
 #inventario .equipado {
     background-color: rgb(250, 247, 247);
     flex: 2 1 auto;
