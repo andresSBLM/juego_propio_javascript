@@ -17,9 +17,10 @@
     display: flex;
     flex-direction: column;
     box-shadow: 4px 4px 4px rgba(12, 60, 1, 0.674),
-                -4px 4px 4px rgba(20, 62, 2, 0.673);
+        -4px 4px 4px rgba(20, 62, 2, 0.673);
     /* user-select: none; */
 }
+
 #jugador {
     flex: 0 0 12vh;
     background: linear-gradient(rgba(56, 224, 47, 0.663), rgba(19, 83, 8, 0.647));
@@ -38,12 +39,16 @@
     width: 30%;
 }
 
-#vida p, #quemados p, #restantes p {
+#vida p,
+#quemados p,
+#restantes p {
     margin: 0;
     font-size: calc(var(--lado) * 0.04);
 }
 
-#vida, #quemados, #restantes {
+#vida,
+#quemados,
+#restantes {
     text-shadow: 1px 1px 2px rgba(3, 3, 3, 0.797);
 }
 
@@ -158,8 +163,8 @@
     border-radius: 10px;
     position: relative;
     box-shadow: inset 2px 2px 2px white,
-                inset -2px -2px 2px grey,
-                2px 2px 2px rgba(0, 0, 0, 0.611);
+        inset -2px -2px 2px grey,
+        2px 2px 2px rgba(0, 0, 0, 0.611);
     display: flex;
     place-items: end;
     justify-content: center;
@@ -235,7 +240,10 @@
     text-shadow: 2px 2px 2px grey;
 }
 
-.bala1, .bala2, .bala3, .bala4 {
+.bala1,
+.bala2,
+.bala3,
+.bala4 {
     color: transparent;
     background: transparent;
     background-color: rgb(4, 255, 247);
@@ -243,30 +251,43 @@
 
 .bala1 {
     box-shadow: inset 5px -5px 8px rgb(7, 142, 133),
-                inset -3px 3px 8px white;
+        inset -3px 3px 8px white;
     border-radius: 50%;
 }
 
 .bala2 {
     box-shadow: inset 5px 5px 8px rgb(7, 142, 133),
-                inset -3px -3px 8px white;
+        inset -3px -3px 8px white;
     border-radius: 50%;
 }
 
 .bala3 {
     color: transparent;
     box-shadow: inset -5px 5px 8px rgb(7, 142, 133),
-                inset 3px -3px 8px white;
+        inset 3px -3px 8px white;
     border-radius: 50%;
 }
 
 .bala4 {
     color: transparent;
     box-shadow: inset -5px -5px 8px rgb(7, 142, 133),
-                inset 3px -3px 8px white;
+        inset 3px -3px 8px white;
     border-radius: 50%;
 }
 
+.plasm_bullet1 {
+    background: repeating-linear-gradient(90deg,
+            #4fc3f7 calc(0px),
+            #e1f5fe calc(10px),
+            #4fc3f7 calc(20px));
+}
+
+.plasm_bullet2 {
+    background: repeating-linear-gradient(
+            #4fc3f7 calc(0px),
+            #e1f5fe calc(10px),
+            #4fc3f7 calc(20px));
+}
 
 #div_tiempo {
     background-color: rgb(48, 220, 250);
@@ -280,13 +301,13 @@
     font-weight: bold;
     border-radius: 10px;
     box-shadow: inset 3px 3px 3px rgb(188, 241, 234),
-                inset -3px -3px 3px rgb(80, 151, 179);
+        inset -3px -3px 3px rgb(80, 151, 179);
     color: rgb(37, 93, 156);
     text-shadow: 1px 1px 2px rgb(255, 255, 255);
 }
 
 #principal .enemigo {
-    background-image:url(../img/enemigo.png);
+    background-image: url(../img/enemigo.png);
     background-position: center;
     background-repeat: no-repeat;
     background-size: contain;
@@ -303,7 +324,7 @@
     justify-content: space-evenly;
     border-radius: 10px;
     box-shadow: inset 3px 3px 3px rgb(255, 72, 72),
-                inset -3px -3px 3px rgb(56, 1, 1);
+        inset -3px -3px 3px rgb(56, 1, 1);
     color: white;
     font-size: 1.25rem;
     font-weight: bold;
@@ -318,4 +339,3 @@
     width: 20px;
     height: 20px;
 }
-

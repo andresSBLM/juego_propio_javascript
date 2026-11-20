@@ -119,6 +119,7 @@ function insertar_fuego() {
 //Funcion encargada de insertar aleatoriamente fuego en los bordes
 
 function spawnear_fuego() {
+    if (casillas_quemadas === 0) return;
     const PARED_RANDOM = Math.floor(Math.random() * 5);
     const POSICION = Math.floor(Math.random() * TAMAÑO);
     var nuevo_array;
@@ -216,7 +217,6 @@ function verdelante(ejex, ejey) {
             inventario.plasm_canon = objetos.plasm_canon;
             cargar_inventario();
             insertar_fuego();
-            esparcir_fuego();
             break;
         case VENDAS:
             avanzar = false;
@@ -227,6 +227,8 @@ function verdelante(ejex, ejey) {
             cargar_inventario();
             break;
         case BALA:
+            avanzar = false;
+        case PLASM_BULLET:
             avanzar = false;
         case ENEMIGO:
             avanzar = false;
@@ -323,7 +325,7 @@ document.addEventListener('keydown', event => {
                 crear_bala();
                 break;
         }
-    } else if (equipado == "canon_plasm") {
+    } else if (equipado == "plasm_canon") {
         switch (event.key) {
             case 'ArrowUp':
                 PROTAGONISTA.style.transform = "rotate(180deg)";
@@ -684,6 +686,9 @@ function esparcir_fuego() {
                             } else if (partida[ejey + y][ejex + x] == VENDAS) {
                                 ELEMENTO.removeAttribute("id");
                                 partida[ejey + y].splice(ejex + x, 1, TEXTO);
+                            } else if (partida[ejey + y][ejex + x] == PLASM_BULLET) {
+                                ELEMENTO.classList.remove("plasm_bullet1", "plasm_bullet2");
+                                partida[ejey + y].splice(ejex + x, 1, TEXTO);
                             }
                             ELEMENTO.textContent = FUEGO;
                             ELEMENTO.dataset.visto = "visto";
@@ -809,7 +814,7 @@ function avanzar_tiempo() {
 function spawnear_enemigo() {
     if (casillas_quemadas >= 300) return;
     if (vida <= 0) return;
-    const LUGARES_DISPONIBLES = document.querySelectorAll(".casilla:not(.fuego):not([id])");
+    const LUGARES_DISPONIBLES = document.querySelectorAll(".casilla:not(.fuego):not([id]):not(.plasm_bullet)");
     if (LUGARES_DISPONIBLES.length === 0) return;
     sumar_fuego();
     const NUM_RANDOM = Math.floor(Math.random() * (LUGARES_DISPONIBLES.length));
@@ -830,6 +835,9 @@ function verdelante_enemigo(ejex, ejey) {
         case ENEMIGO:
             return false;
         case TEXTO:
+            sumar_fuego();
+            return true;
+        case PLASM_BULLET:
             sumar_fuego();
             return true;
         case PROTA:
@@ -945,7 +953,7 @@ function dropear_objeto(ejex, ejey) {
         ELEMENTO.classList.remove("fuego");
         ELEMENTO.removeAttribute("data-visto");
         restar_fuego();
-    } else if (NUMERO_RANDOM <= 10 && !inventario.vendas && !document.getElementById("id_vendas")) {
+    } else if (NUMERO_RANDOM <= 60 && !inventario.vendas && !document.getElementById("id_vendas")) {
         partida[ejey].splice(ejex, 1, VENDAS);
         const ELEMENTO = conseguir_elemento(ejex, ejey);
         ELEMENTO.id = "id_vendas";
@@ -980,32 +988,86 @@ function conseguir_elemento(ejex, ejey) {
 }
 
 function crear_plasm_bullet() {
-    const EL_PROTA = document.getElementById("EL_PROTA");
+    const EL_PROTA = document.getElementById("protagonista");
     if (!EL_PROTA) return;
     const EJE_X_PROTA = parseInt(EL_PROTA.dataset.ejex);
     const EJE_Y_PROTA = parseInt(EL_PROTA.dataset.ejey);
     var nuevo_array;
     var nueva_posicion;
-    switch (direccion) {
-        case 'norte':
-            nueva_posicion = EJE_X_PROTA - 1;
-            nuevo_array = EJE_Y_PROTA;
-            for (let x = 0; x < TAMAÑO; X++) {
-                const ELEMENTO = conseguir_elemento(nueva_posicion - x, nuevo_array);
-                if (!ELEMENTO) return;
-            }
+    var movimiento = true;
+    id_plasm_bullet++;
+    const ID = id_plasm_bullet;
+    for (let x = 1; x < TAMAÑO; x++) {
+        switch (direccion) {
+            case 'norte':
+                nueva_posicion = EJE_X_PROTA;
+                nuevo_array = EJE_Y_PROTA - x;
+                break;
+            case 'sur':
+                nueva_posicion = EJE_X_PROTA;
+                nuevo_array = EJE_Y_PROTA + x;
+                break;
+            case 'este':
+                nueva_posicion = EJE_X_PROTA - x;
+                nuevo_array = EJE_Y_PROTA;
+                break;
+            case 'oeste':
+                nueva_posicion = EJE_X_PROTA + x;
+                nuevo_array = EJE_Y_PROTA;
+                break;
+        }
+
+        const ELEMENTO = conseguir_elemento(nueva_posicion, nuevo_array);
+        if (!ELEMENTO) break;
+        if (partida[nuevo_array][nueva_posicion] == PROTA) continue;
+        if (!movimiento) break;
+        if (!verdelante_plasm_bullet(nueva_posicion, nuevo_array)) {
+            movimiento = false;
             break;
-        case 'sur':
-            nueva_posicion = EJE_X_PROTA + 1;
-            nuevo_array = EJE_Y_PROTA;
-            break;
-        case 'este':
-            nueva_posicion = EJE_X_PROTA;
-            nuevo_array = EJE_Y_PROTA - 1;
-            break;
-        case 'oeste':
-            nueva_posicion = EJE_X_PROTA;
-            nuevo_array = EJE_Y_PROTA + 1;
-            break;
+        }
+        if (partida[nuevo_array][nueva_posicion] == TEXTO) {
+            partida[nuevo_array][nueva_posicion] = PLASM_BULLET;
+            ELEMENTO.id = "plasm_bullet" + ID;
+            (nueva_posicion == EJE_X_PROTA) ? ELEMENTO.classList.add("plasm_bullet1") : ELEMENTO.classList.add("plasm_bullet2");
+        }
     }
+    cargar();
+    setTimeout(() => {
+        const BALAS = document.querySelectorAll(`[id="${"plasm_bullet" + ID}"]`);
+        BALAS.forEach(element => {
+            element.classList.remove("plasm_bullet1", "plasm_bullet2");
+            element.removeAttribute("id");
+            const ejex = parseInt(element.dataset.ejex);
+            const ejey = parseInt(element.dataset.ejey);
+            if (partida[ejey][ejex] == PLASM_BULLET) partida[ejey][ejex] = TEXTO;
+        });
+    }, velocidad_plasm_bullet)
+}
+
+function verdelante_plasm_bullet(ejex, ejey) {
+    const ELEMENTO = conseguir_elemento(ejex, ejey);
+    if (!ELEMENTO) return false;
+    switch (partida[ejey][ejex]) {
+        case FUEGO:
+            ELEMENTO.classList.remove("fuego");
+            ELEMENTO.removeAttribute("data-visto");
+            partida[ejey].splice(ejex, 1, TEXTO);
+            restar_fuego();
+            cambiar_fondo();
+            cargar();
+            return true;
+        case ENEMIGO:
+            ELEMENTO.classList.remove("enemigo");
+            ELEMENTO.removeAttribute("id");
+            ELEMENTO.style.removeProperty("transform");
+            partida[ejey].splice(ejex, 1, TEXTO);
+            enemigos_derrotados++;
+            ENEMIGOS.textContent = enemigos_derrotados;
+            dropear_objeto(ejex, ejey);
+            cambiar_fondo();
+            if (partida[ejey][ejex] == TEXTO) restar_fuego();
+            cargar();
+            return true;
+    }
+    return true;
 }
