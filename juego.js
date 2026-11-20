@@ -226,6 +226,14 @@ function verdelante(ejex, ejey) {
             inventario.vendas = objetos.vendas;
             cargar_inventario();
             break;
+        case GRANADA:
+            avanzar = false;
+            ELEMENTO.removeAttribute("id");
+            ELEMENTO.textContent = TEXTO;
+            partida[ejey][ejex] = TEXTO;
+            inventario.granada = objetos.granada;
+            cargar_inventario();
+            break;
         case BALA:
             avanzar = false;
         case PLASM_BULLET:
@@ -346,6 +354,29 @@ document.addEventListener('keydown', event => {
                 PROTAGONISTA.style.transform = "rotate(-90deg)";
                 direccion = 'oeste';
                 crear_plasm_bullet();
+                break;
+        }
+    } else if (equipado == "granada") {
+        switch (event.key) {
+            case 'ArrowUp':
+                PROTAGONISTA.style.transform = "rotate(180deg)";
+                direccion = 'norte';
+                lanzar_granada();
+                break;
+            case 'ArrowDown':
+                PROTAGONISTA.style.transform = "rotate(0deg)";
+                direccion = 'sur';
+                lanzar_granada();
+                break;
+            case 'ArrowLeft':
+                PROTAGONISTA.style.transform = "rotate(90deg)";
+                direccion = 'este';
+                lanzar_granada();
+                break;
+            case 'ArrowRight':
+                PROTAGONISTA.style.transform = "rotate(-90deg)";
+                direccion = 'oeste';
+                lanzar_granada();
                 break;
         }
     }
@@ -985,17 +1016,24 @@ function mover_enemigo(id) {
 
 function dropear_objeto(ejex, ejey) {
     const NUMERO_RANDOM = Math.floor(Math.random() * 101);
-    if (NUMERO_RANDOM <= 50 && !inventario.plasm_canon && !document.getElementById("id_plasm_canon")) {
+    if (NUMERO_RANDOM <= DROP_PLASM_CANON && !inventario.plasm_canon && !document.getElementById("id_plasm_canon")) {
         partida[ejey].splice(ejex, 1, PLASM_CANON);
         const ELEMENTO = conseguir_elemento(ejex, ejey);
         ELEMENTO.id = "id_plasm_canon";
         ELEMENTO.classList.remove("fuego");
         ELEMENTO.removeAttribute("data-visto");
         restar_fuego();
-    } else if (NUMERO_RANDOM <= 50 && !inventario.vendas && !document.getElementById("id_vendas")) {
+    } else if (NUMERO_RANDOM <= DROP_VENDAS && !inventario.vendas && !document.getElementById("id_vendas")) {
         partida[ejey].splice(ejex, 1, VENDAS);
         const ELEMENTO = conseguir_elemento(ejex, ejey);
         ELEMENTO.id = "id_vendas";
+        ELEMENTO.classList.remove("fuego");
+        ELEMENTO.removeAttribute("data-visto");
+        restar_fuego();
+    } else if (NUMERO_RANDOM <= DROP_GRANADA && !inventario.granada && !document.getElementById("id_granada")) {
+        partida[ejey].splice(ejex, 1, GRANADA);
+        const ELEMENTO = conseguir_elemento(ejex, ejey);
+        ELEMENTO.id = "id_granada";
         ELEMENTO.classList.remove("fuego");
         ELEMENTO.removeAttribute("data-visto");
         restar_fuego();
@@ -1029,8 +1067,8 @@ function conseguir_elemento(ejex, ejey) {
 function crear_plasm_bullet() {
     const EL_PROTA = document.getElementById("protagonista");
     if (!EL_PROTA) return;
-    const EJE_X_PROTA = parseInt(EL_PROTA.dataset.ejex);
-    const EJE_Y_PROTA = parseInt(EL_PROTA.dataset.ejey);
+    const EJE_X_PROTA = player_position;
+    const EJE_Y_PROTA = player_array;
     var nuevo_array;
     var nueva_posicion;
     var movimiento = true;
@@ -1109,4 +1147,108 @@ function verdelante_plasm_bullet(ejex, ejey) {
             return true;
     }
     return true;
+}
+
+function lanzar_granada() {
+    const PROTAGONISTA = document.getElementById("protagonista");
+    var movimiento = true;
+    var nuevo_array;
+    var nueva_posicion;
+    var anterior_array;
+    var anterior_posicion;
+    const DIR = direccion;
+
+    if (!PROTAGONISTA) return;
+    const EJEX = parseInt(PROTAGONISTA.dataset.ejex);
+    const EJEY = parseInt(PROTAGONISTA.dataset.ejey);
+    for (let x = 1; x <= TAMAÑO; x++) {
+        setTimeout(() => {
+            switch (DIR) {
+                case 'norte':
+                    nueva_posicion = EJEX;
+                    nuevo_array = EJEY - x;
+                    anterior_posicion = EJEX;
+                    anterior_array = EJEY - x + 1;
+                    break;
+                case 'sur':
+                    nueva_posicion = EJEX;
+                    nuevo_array = EJEY + x;
+                    anterior_posicion = EJEX;
+                    anterior_array = EJEY + x - 1;
+                    break;
+                case 'este':
+                    nueva_posicion = EJEX - x;
+                    nuevo_array = EJEY;
+                    anterior_posicion = EJEX - x + 1;
+                    anterior_array = EJEY;
+                    break;
+                case 'oeste':
+                    nueva_posicion = EJEX + x;
+                    nuevo_array = EJEY;
+                    anterior_posicion = EJEX + x - 1;
+                    anterior_array = EJEY;
+                    break;
+            }
+            const ELEMENTO = conseguir_elemento(anterior_posicion, anterior_array)
+            const NUEVO_ELEMENTO = conseguir_elemento(nueva_posicion, nuevo_array);
+            if (!ELEMENTO || !movimiento) return;
+            if (!NUEVO_ELEMENTO) {
+                movimiento = false;
+                ELEMENTO.classList.remove("granada_lanzada");
+                partida[anterior_array][anterior_posicion] = TEXTO;
+                return;
+            }
+            if (!verdelante_granada(nueva_posicion, nuevo_array)) {
+                movimiento = false;
+                return;
+            }
+            if (partida[anterior_array][anterior_posicion] != PROTA) {
+                ELEMENTO.classList.remove("granada_lanzada");
+                partida[anterior_array][anterior_posicion] = TEXTO;
+            }
+            NUEVO_ELEMENTO.classList.add("granada_lanzada");
+            partida[nuevo_array][nueva_posicion] = GRANADA;
+        }, velocidad_granada * x);
+    }
+
+}
+
+function verdelante_granada(ejex, ejey) {
+    const ELEMENTO = conseguir_elemento(ejex, ejey);
+    const ID = ELEMENTO.id;
+    if (!ELEMENTO) return;
+    switch (partida[ejey][ejex]) {
+        case FUEGO:
+        case ENEMIGO:
+            activar_granada(ejex, ejey);
+            return false;
+        case PROTA:
+            return false;
+    }
+    return true;
+}
+
+function activar_granada(ejex, ejey) {
+    for (let x = 0; x <= 3; x++) {
+        for (let y = -1; y <= 1; y++) {
+            for (let z = -1; z <= 1; z++) {
+                const nx = ejex + x;
+                const ny = ejey + y;
+                const ELEMENTO = conseguir_elemento(nx, ny);
+                if (!ELEMENTO) continue;
+                switch (partida[ny][nx]) {
+                    case FUEGO:
+                    case ENEMIGO:
+                        ELEMENTO.removeAttribute("data-visto");
+                        ELEMENTO.classList.remove("fuego", "enemigo");
+                        ELEMENTO.removeAttribute("id");
+                        ELEMENTO.style.removeProperty("transform");
+                        partida[ny][nx] = TEXTO;
+                        restar_fuego();
+                        break;
+                }
+            }
+        }
+    }
+    cargar();
 }

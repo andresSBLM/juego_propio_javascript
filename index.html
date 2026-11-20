@@ -63,7 +63,7 @@
         const PISTOLA = "1";
         const VENDAS = "2";
         const PLASM_CANON = "3";
-        const BALA = "o";
+        const GRANADA = "4";        const BALA = "o";
         const PLASM_BULLET = "O";
         const TAMAÑO = 20;
         const MITAD = Math.floor(TAMAÑO / 2);
@@ -96,7 +96,8 @@
         var objetos = {
             'pistola': '../img/pistola.avif',
             'vendas': '../img/venda.jpeg',
-            'plasm_canon': '../img/plasm_canon.png'
+            'plasm_canon': '../img/plasm_canon.png',
+            'granada': '../img/granada.png'
         }
         var inventario = {};
         var equipado = "";
@@ -121,12 +122,20 @@
         //VARIABLES PLASM CANON 
         var id_plasm_bullet = 0;
         var velocidad_plasm_bullet = 200;
+
+        //VARIABLES GRANADA
+        var velocidad_granada = 50;
         
         //Variables de movimiento
         var direccion = 'norte';
         var grados_rotacion = {'norte': 180, 'este': 90, 'sur':0, 'oeste':-90}
         var player_array;
         var player_position;
+
+        //PROBABILIDADES DROPS (1-100)
+        const DROP_PLASM_CANON = 5;
+        const DROP_VENDAS = 20;
+        const DROP_GRANADA = 80;
 
         //FUNCIONES PARA EL INICIO DE LA PARTIDA
         const CONTENEDOR = document.getElementById("contenedor_principal");
