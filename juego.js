@@ -208,6 +208,7 @@ function verdelante(ejex, ejey) {
             cargar_inventario();
             insertar_fuego();
             esparcir_fuego();
+            spawnear_enemigo();
             break;
         case PLASM_CANON:
             avanzar = false;
@@ -216,7 +217,6 @@ function verdelante(ejex, ejey) {
             partida[ejey][ejex] = TEXTO;
             inventario.plasm_canon = objetos.plasm_canon;
             cargar_inventario();
-            insertar_fuego();
             break;
         case VENDAS:
             avanzar = false;
@@ -399,6 +399,21 @@ document.addEventListener('keydown', event => {
         case '2':
             if (Object.keys(inventario).length > 1) {
                 i = 1;
+            }
+            break;
+        case '3':
+            if (Object.keys(inventario).length > 2) {
+                i = 2;
+            }
+            break;
+        case '4':
+            if (Object.keys(inventario).length > 2) {
+                i = 3;
+            }
+            break;
+        case '5':
+            if (Object.keys(inventario).length > 2) {
+                i = 4;
             }
             break;
     }
@@ -666,34 +681,43 @@ function esparcir_fuego() {
                     const ELEMENTO = conseguir_elemento(ejex + x, ejey + y);
                     if (ELEMENTO) {
                         if (!ELEMENTO.dataset.visto) {
-                            if (partida[ejey + y][ejex + x] == PROTA) {
-                                partida[ejey + y].splice(ejex + x, 1, FUEGO);
-                                ELEMENTO.removeAttribute("id");
-                                ELEMENTO.style.removeProperty("transform");
-                                ELEMENTO.dataset.visto = "visto";
-                                direccion = 'norte';
-                                daño = true;
-                                sumar_fuego();
-                                spawnear_jugador();
-                                continue;
-                            }
-                            else if (partida[ejey + y][ejex + x] == BALA) {
-                                ELEMENTO.textContent = TEXTO;
-                                ELEMENTO.removeAttribute("id");
-                                ELEMENTO.classList.remove("bala1", "bala2", "bala3", "bala4");
-                            } else if (partida[ejey + y][ejex + x] == ENEMIGO) {
-                                continue;
-                            } else if (partida[ejey + y][ejex + x] == VENDAS) {
-                                ELEMENTO.removeAttribute("id");
-                                partida[ejey + y].splice(ejex + x, 1, TEXTO);
-                            } else if (partida[ejey + y][ejex + x] == PLASM_BULLET) {
-                                ELEMENTO.classList.remove("plasm_bullet1", "plasm_bullet2");
-                                partida[ejey + y].splice(ejex + x, 1, TEXTO);
+                            switch (partida[ejey + y][ejex + x]) {
+                                case PROTA:
+                                    partida[ejey + y].splice(ejex + x, 1, FUEGO);
+                                    ELEMENTO.removeAttribute("id");
+                                    ELEMENTO.style.removeProperty("transform");
+                                    ELEMENTO.dataset.visto = "visto";
+                                    direccion = 'norte';
+                                    daño = true;
+                                    sumar_fuego();
+                                    spawnear_jugador();
+                                    continue;
+
+                                case BALA:
+                                    ELEMENTO.textContent = TEXTO;
+                                    ELEMENTO.removeAttribute("id");
+                                    ELEMENTO.classList.remove("bala1", "bala2", "bala3", "bala4");
+                                    break;
+                                case ENEMIGO:
+                                    continue;
+                                case VENDAS:
+                                    ELEMENTO.removeAttribute("id");
+                                    partida[ejey + y].splice(ejex + x, 1, TEXTO);
+                                    break;
+                                case PLASM_BULLET:
+                                    ELEMENTO.classList.remove("plasm_bullet1", "plasm_bullet2");
+                                    partida[ejey + y].splice(ejex + x, 1, TEXTO);
+                                    break;
+                                case PLASM_CANON:
+                                    ELEMENTO.removeAttribute("id");
+                                    ELEMENTO.classList.remove("plasm_bullet1", "plasm_bullet2");
+                                    break;
                             }
                             ELEMENTO.textContent = FUEGO;
                             ELEMENTO.dataset.visto = "visto";
                             partida[ejey + y][ejex + x] = FUEGO;
                             sumar_fuego();
+
                         }
                     }
 
@@ -716,13 +740,13 @@ function esparcir_fuego() {
 function cambiar_fondo() {
     const FONDO = document.getElementById("body");
     var background;
-    if (casillas_quemadas > 350) {
+    if (casillas_quemadas > MAYORIA) {
         background = "linear-gradient(rgba(248, 8, 8, 0.81),rgba(255, 123, 0, 0.81),rgba(252, 227, 1, 0.87)) , url(../img/fondowebp.webp)";
-    } else if (casillas_quemadas > 300) {
+    } else if (casillas_quemadas > TRES_CUARTOS) {
         background = "linear-gradient(rgba(214, 26, 26, 0.73),rgba(214, 112, 17, 0.8),rgba(231, 210, 20, 0.74)) , url(../img/fondowebp.webp)";
-    } else if (casillas_quemadas > 200) {
+    } else if (casillas_quemadas > MITAD_TOTAL) {
         background = "linear-gradient(rgba(212, 43, 43, 0.57),rgba(214, 112, 17, 0.62),rgba(231, 210, 20, 0.6)) , url(../img/fondowebp.webp)";
-    } else if (casillas_quemadas > 100) {
+    } else if (casillas_quemadas > UN_CUARTO) {
         background = "linear-gradient(rgba(255, 83, 83, 0.464),rgba(214, 112, 17, 0.46),rgba(231, 210, 20, 0.46)) , url(../img/fondowebp.webp)";
     } else {
         background = "linear-gradient(rgba(255, 255, 255, 0.464), rgba(0, 128, 0, 0.53)), url(../img/fondowebp.webp)";
@@ -783,6 +807,11 @@ function derrota() {
 //Funcion encargada de gestionar el inventario
 
 function cargar_inventario() {
+    const FOTOS = document.getElementsByClassName("foto");
+    for (let foto of FOTOS) {
+        foto.src = "";
+        foto.classList.remove("foto_objeto");
+    }
     for (let x = 0; x < Object.keys(inventario).length; x++) {
         const CLAVE = Object.keys(inventario)[x];
         const RUTA = inventario[CLAVE];
@@ -795,16 +824,19 @@ function cargar_inventario() {
 //Función encargada de avanzar el tiempo de juego 
 
 function avanzar_tiempo() {
-
     setTimeout(() => {
         tiempo_de_juego++;
         TIEMPO.textContent = tiempo_de_juego;
-        if (tiempo_de_juego % ratio_spawneo == 0 && Object.keys(inventario).length !== 0) {
-            spawnear_enemigo();
-        }
         if (tiempo_de_juego % velocidad_spawn_fuego == 0 && Object.keys(inventario).length !== 0) {
-            spawnear_fuego();
+            for (let x = 0; x <= 5; x++)spawnear_fuego();
         }
+        if (casillas_quemadas < 300 && !spawnear_enemigos) {
+            spawnear_enemigo();
+            spawnear_enemigos = true;
+        }
+        velocidad_fuego *= 0.99;
+        velocidad_enemigo *= 0.99;
+        ratio_spawneo *= 0.99;
         avanzar_tiempo();
     }, 1000);
 }
@@ -812,20 +844,26 @@ function avanzar_tiempo() {
 //Funcion que spawnea un enemigo 
 
 function spawnear_enemigo() {
-    if (casillas_quemadas >= 300) return;
-    if (vida <= 0) return;
-    const LUGARES_DISPONIBLES = document.querySelectorAll(".casilla:not(.fuego):not([id]):not(.plasm_bullet)");
-    if (LUGARES_DISPONIBLES.length === 0) return;
-    sumar_fuego();
-    const NUM_RANDOM = Math.floor(Math.random() * (LUGARES_DISPONIBLES.length));
-    const LUGAR_RANDOM = LUGARES_DISPONIBLES[NUM_RANDOM];
-    const EJE_Y = parseInt(LUGAR_RANDOM.dataset.ejey);
-    const EJE_X = parseInt(LUGAR_RANDOM.dataset.ejex);
-    partida[EJE_Y].splice(EJE_X, 1, ENEMIGO);
-    LUGAR_RANDOM.id = "enemigo" + id_enemigo;
-    mover_enemigo("enemigo" + id_enemigo);
-    id_enemigo++;
-    cargar();
+    setTimeout(() => {
+        if (casillas_quemadas >= TRES_CUARTOS) {
+            spawnear_enemigos = false;
+            return;
+        }
+        if (vida <= 0) return;
+        const LUGARES_DISPONIBLES = document.querySelectorAll(".casilla:not(.fuego):not([id]):not(.plasm_bullet)");
+        if (LUGARES_DISPONIBLES.length === 0) return;
+        sumar_fuego();
+        const NUM_RANDOM = Math.floor(Math.random() * (LUGARES_DISPONIBLES.length));
+        const LUGAR_RANDOM = LUGARES_DISPONIBLES[NUM_RANDOM];
+        const EJE_Y = parseInt(LUGAR_RANDOM.dataset.ejey);
+        const EJE_X = parseInt(LUGAR_RANDOM.dataset.ejex);
+        partida[EJE_Y].splice(EJE_X, 1, ENEMIGO);
+        LUGAR_RANDOM.id = "enemigo" + id_enemigo;
+        mover_enemigo("enemigo" + id_enemigo);
+        id_enemigo++;
+        cargar();
+        spawnear_enemigo();
+    }, ratio_spawneo)
 }
 
 //Función encargada de ver delante del enemigo
@@ -855,6 +893,7 @@ function verdelante_enemigo(ejex, ejey) {
 //Función encargada de mover al enemigo
 
 function mover_enemigo(id) {
+    cambiar_fondo();
     setTimeout(() => {
         var movimiento_x;
         var movimiento_y;
@@ -946,14 +985,14 @@ function mover_enemigo(id) {
 
 function dropear_objeto(ejex, ejey) {
     const NUMERO_RANDOM = Math.floor(Math.random() * 101);
-    if (NUMERO_RANDOM <= 80 && !inventario.plasm_canon && !document.getElementById("id_plasm_canon")) {
+    if (NUMERO_RANDOM <= 50 && !inventario.plasm_canon && !document.getElementById("id_plasm_canon")) {
         partida[ejey].splice(ejex, 1, PLASM_CANON);
         const ELEMENTO = conseguir_elemento(ejex, ejey);
         ELEMENTO.id = "id_plasm_canon";
         ELEMENTO.classList.remove("fuego");
         ELEMENTO.removeAttribute("data-visto");
         restar_fuego();
-    } else if (NUMERO_RANDOM <= 60 && !inventario.vendas && !document.getElementById("id_vendas")) {
+    } else if (NUMERO_RANDOM <= 50 && !inventario.vendas && !document.getElementById("id_vendas")) {
         partida[ejey].splice(ejex, 1, VENDAS);
         const ELEMENTO = conseguir_elemento(ejex, ejey);
         ELEMENTO.id = "id_vendas";
@@ -1057,7 +1096,7 @@ function verdelante_plasm_bullet(ejex, ejey) {
             cargar();
             return true;
         case ENEMIGO:
-            ELEMENTO.classList.remove("enemigo");
+            ELEMENTO.classList.remove("enemigo", "fuego");
             ELEMENTO.removeAttribute("id");
             ELEMENTO.style.removeProperty("transform");
             partida[ejey].splice(ejex, 1, TEXTO);
