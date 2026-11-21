@@ -235,8 +235,45 @@
     background-size: cover;
 }   
 
-#principal .granada_lanzada {
-    background-color: #4fc3f7;
+#principal .granada_lanzada1 {
+    background: linear-gradient(rgba(19, 239, 220, 0.841), rgba(0, 0, 255, 0.5)), url(../img/granada.png);
+    background-position: center;
+    background-size: cover;
+    transform: rotate(90deg);
+}
+
+#principal .granada_lanzada2 {
+    background: linear-gradient(rgba(19, 239, 220, 0.841), rgba(0, 0, 255, 0.5)), url(../img/granada.png);
+    background-position: center;
+    background-size: cover;
+    transform: rotate(180deg);
+}
+
+#principal .granada_lanzada3 {
+    background: linear-gradient(rgba(19, 239, 220, 0.841), rgba(0, 0, 255, 0.5)), url(../img/granada.png);
+    background-position: center;
+    background-size: cover;
+    transform: rotate(270deg);
+}
+
+#principal .granada_lanzada4 {
+    background: linear-gradient(rgba(19, 239, 220, 0.841), rgba(0, 0, 255, 0.5)), url(../img/granada.png);
+    background-position: center;
+    background-size: cover;
+    transform: rotate(360deg);
+}
+
+#principal .impacto {
+    background-color: white;
+}
+
+#principal .radio1 {
+    background-color: #9fdefd;
+}
+
+#principal .radio2
+{
+    background-color: rgb(116, 243, 243);
 }
 
 #inventario .equipado {

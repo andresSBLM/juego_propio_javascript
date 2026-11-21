@@ -545,23 +545,28 @@ function crear_bala() {
 
     const ELEMENTO = conseguir_elemento(nueva_posicion, nuevo_array);
     if (!ELEMENTO) return;
-    if (partida[nuevo_array][nueva_posicion] == FUEGO) {
-        ELEMENTO.removeAttribute("data-visto");
-        ELEMENTO.classList.remove("fuego");
-        partida[nuevo_array].splice(nueva_posicion, 1, TEXTO);
-        restar_fuego();
-        cargar();
-        return;
-    } else if (partida[nuevo_array][nueva_posicion] == ENEMIGO) {
-        ELEMENTO.removeAttribute("id");
-        ELEMENTO.classList.remove("enemigo");
-        ELEMENTO.style.removeProperty("transform");
-        partida[nuevo_array].splice(nueva_posicion, 1, FUEGO);
-        ELEMENTO.classList.add("fuego");
-        ELEMENTO.dataset.visto = "visto";
-        dropear_objeto(nueva_posicion, nuevo_array);
-        cargar();
-        return;
+    switch (partida[nuevo_array][nueva_posicion]) {
+        case FUEGO:
+            ELEMENTO.removeAttribute("data-visto");
+            ELEMENTO.classList.remove("fuego");
+            partida[nuevo_array].splice(nueva_posicion, 1, TEXTO);
+            restar_fuego();
+            cargar();
+            return;
+        case ENEMIGO:
+            ELEMENTO.removeAttribute("id");
+            ELEMENTO.classList.remove("enemigo");
+            ELEMENTO.style.removeProperty("transform");
+            partida[nuevo_array].splice(nueva_posicion, 1, FUEGO);
+            ELEMENTO.classList.add("fuego");
+            ELEMENTO.dataset.visto = "visto";
+            dropear_objeto(nueva_posicion, nuevo_array);
+            cargar();
+            return;
+        case VENDAS:
+        case PLASM_CANON:
+        case GRANADA:
+            return;
     }
     partida[nuevo_array][nueva_posicion] = BALA;
     ELEMENTO.id = "bala" + id_bala;
@@ -650,39 +655,37 @@ function verdelante_bala(nuevo_ejex, nuevo_ejey, ejex, ejey) {
         const ELEMENTO_NUEVO = conseguir_elemento(nuevo_ejex, nuevo_ejey);
         ELEMENTO.classList.remove("bala1", "bala2", "bala3", "bala4");
         ELEMENTO.removeAttribute("id");
-        if (partida[nuevo_ejey][nuevo_ejex] == FUEGO) {
-            ELEMENTO_NUEVO.classList.remove("fuego");
-            ELEMENTO_NUEVO.removeAttribute("data-visto");
-            partida[ejey].splice(ejex, 1, TEXTO);
-            partida[nuevo_ejey].splice(nuevo_ejex, 1, TEXTO);
-            restar_fuego();
-            cambiar_fondo();
-            cargar();
-            return false;
-        } else if (partida[nuevo_ejey][nuevo_ejex] == ENEMIGO) {
-            ELEMENTO_NUEVO.classList.remove("enemigo");
-            ELEMENTO_NUEVO.removeAttribute("id");
-            ELEMENTO_NUEVO.style.removeProperty("transform");
-            ELEMENTO_NUEVO.dataset.visto = "visto";
-            ELEMENTO_NUEVO.classList.add("fuego");
-            partida[ejey].splice(ejex, 1, TEXTO);
-            partida[nuevo_ejey].splice(nuevo_ejex, 1, FUEGO);
-            enemigos_derrotados++;
-            ENEMIGOS.textContent = enemigos_derrotados;
-            dropear_objeto(nuevo_ejex, nuevo_ejey);
-            cambiar_fondo();
-            cargar();
-            return false;
-        } else if (partida[nuevo_ejey][nuevo_ejex] == VENDAS) {
-            partida[ejey].splice(ejex, 1, TEXTO);
-            cargar();
-            return false;
-        } else if (partida[nuevo_ejey][nuevo_ejex] == PLASM_CANON) {
-            partida[ejey].splice(ejex, 1, TEXTO);
-            cargar();
-            return false;
+        switch (partida[nuevo_ejey][nuevo_ejex]) {
+            case ENEMIGO:
+                ELEMENTO_NUEVO.classList.remove("enemigo");
+                ELEMENTO_NUEVO.removeAttribute("id");
+                ELEMENTO_NUEVO.style.removeProperty("transform");
+                ELEMENTO_NUEVO.dataset.visto = "visto";
+                ELEMENTO_NUEVO.classList.add("fuego");
+                partida[ejey].splice(ejex, 1, TEXTO);
+                partida[nuevo_ejey].splice(nuevo_ejex, 1, FUEGO);
+                enemigos_derrotados++;
+                ENEMIGOS.textContent = enemigos_derrotados;
+                dropear_objeto(nuevo_ejex, nuevo_ejey);
+                cambiar_fondo();
+                cargar();
+                return false;
+            case FUEGO:
+                ELEMENTO_NUEVO.classList.remove("fuego");
+                ELEMENTO_NUEVO.removeAttribute("data-visto");
+                partida[ejey].splice(ejex, 1, TEXTO);
+                partida[nuevo_ejey].splice(nuevo_ejex, 1, TEXTO);
+                restar_fuego();
+                cambiar_fondo();
+                cargar();
+                return false;
+            case VENDAS:
+            case PLASM_CANON:
+            case GRANADA:
+                partida[ejey].splice(ejex, 1, TEXTO);
+                cargar();
+                return false;
         }
-
         cargar();
         return true;
 
@@ -723,7 +726,6 @@ function esparcir_fuego() {
                                     sumar_fuego();
                                     spawnear_jugador();
                                     continue;
-
                                 case BALA:
                                     ELEMENTO.textContent = TEXTO;
                                     ELEMENTO.removeAttribute("id");
@@ -741,8 +743,12 @@ function esparcir_fuego() {
                                     break;
                                 case PLASM_CANON:
                                     ELEMENTO.removeAttribute("id");
-                                    ELEMENTO.classList.remove("plasm_bullet1", "plasm_bullet2");
                                     break;
+                                case GRANADA:
+                                    ELEMENTO.removeAttribute("id");
+                                    ELEMENTO.classList.remove("granada_lanzada1", "granada_lanzada2", "granada_lanzada3", "granada_lanzada4");
+                                    break;
+
                             }
                             ELEMENTO.textContent = FUEGO;
                             ELEMENTO.dataset.visto = "visto";
@@ -865,9 +871,15 @@ function avanzar_tiempo() {
             spawnear_enemigo();
             spawnear_enemigos = true;
         }
-        velocidad_fuego *= 0.99;
-        velocidad_enemigo *= 0.99;
-        ratio_spawneo *= 0.99;
+        if (casillas_quemadas > 300) {
+            velocidad_fuego *= 1.01;
+            velocidad_enemigo *= 1.01;
+            ratio_spawneo *= 1.01;
+        } else {
+            velocidad_fuego *= 0.99;
+            velocidad_enemigo *= 0.99;
+            ratio_spawneo *= 0.99;
+        }
         avanzar_tiempo();
     }, 1000);
 }
@@ -881,7 +893,7 @@ function spawnear_enemigo() {
             return;
         }
         if (vida <= 0) return;
-        const LUGARES_DISPONIBLES = document.querySelectorAll(".casilla:not(.fuego):not([id]):not(.plasm_bullet)");
+        const LUGARES_DISPONIBLES = document.querySelectorAll(".casilla:not(.fuego):not([id]):not(.plasm_bullet):not([class^='granada_lanzada'])");
         if (LUGARES_DISPONIBLES.length === 0) return;
         sumar_fuego();
         const NUM_RANDOM = Math.floor(Math.random() * (LUGARES_DISPONIBLES.length));
@@ -1016,27 +1028,29 @@ function mover_enemigo(id) {
 
 function dropear_objeto(ejex, ejey) {
     const NUMERO_RANDOM = Math.floor(Math.random() * 101);
-    if (NUMERO_RANDOM <= DROP_PLASM_CANON && !inventario.plasm_canon && !document.getElementById("id_plasm_canon")) {
-        partida[ejey].splice(ejex, 1, PLASM_CANON);
-        const ELEMENTO = conseguir_elemento(ejex, ejey);
-        ELEMENTO.id = "id_plasm_canon";
+    const ELEMENTO = conseguir_elemento(ejex, ejey);
+    if (!ELEMENTO) return;
+
+    let nombre;
+    let simbolo;
+
+    if (NUMERO_RANDOM < DROP_PLASM_CANON && !inventario.plasm_canon && !document.getElementById("id_plasm_canon")) {
+        nombre = "plasm_canon";
+        simbolo = PLASM_CANON;
+    } else if (NUMERO_RANDOM < DROP_VENDAS && !inventario.vendas && !document.getElementById("id_vendas")) {
+        nombre = "vendas";
+        simbolo = VENDAS;
+    } else if (NUMERO_RANDOM < DROP_GRANADA && !inventario.granada && !document.getElementById("id_granada")) {
+        nombre = "granada";
+        simbolo = GRANADA;
+    }
+
+    if (nombre) {
+        if (partida[ejey][ejex] == FUEGO) restar_fuego();
+        partida[ejey][ejex] = simbolo;
+        ELEMENTO.id = "id_" + nombre;
         ELEMENTO.classList.remove("fuego");
         ELEMENTO.removeAttribute("data-visto");
-        restar_fuego();
-    } else if (NUMERO_RANDOM <= DROP_VENDAS && !inventario.vendas && !document.getElementById("id_vendas")) {
-        partida[ejey].splice(ejex, 1, VENDAS);
-        const ELEMENTO = conseguir_elemento(ejex, ejey);
-        ELEMENTO.id = "id_vendas";
-        ELEMENTO.classList.remove("fuego");
-        ELEMENTO.removeAttribute("data-visto");
-        restar_fuego();
-    } else if (NUMERO_RANDOM <= DROP_GRANADA && !inventario.granada && !document.getElementById("id_granada")) {
-        partida[ejey].splice(ejex, 1, GRANADA);
-        const ELEMENTO = conseguir_elemento(ejex, ejey);
-        ELEMENTO.id = "id_granada";
-        ELEMENTO.classList.remove("fuego");
-        ELEMENTO.removeAttribute("data-visto");
-        restar_fuego();
     }
 }
 
@@ -1157,6 +1171,7 @@ function lanzar_granada() {
     var anterior_array;
     var anterior_posicion;
     const DIR = direccion;
+    var clase = 0;
 
     if (!PROTAGONISTA) return;
     const EJEX = parseInt(PROTAGONISTA.dataset.ejex);
@@ -1194,20 +1209,26 @@ function lanzar_granada() {
             if (!ELEMENTO || !movimiento) return;
             if (!NUEVO_ELEMENTO) {
                 movimiento = false;
-                ELEMENTO.classList.remove("granada_lanzada");
+                ELEMENTO.classList.remove("granada_lanzada1", "granada_lanzada2", "granada_lanzada3", "granada_lanzada4");
                 partida[anterior_array][anterior_posicion] = TEXTO;
                 return;
             }
             if (!verdelante_granada(nueva_posicion, nuevo_array)) {
+                ELEMENTO.classList.remove("granada_lanzada1", "granada_lanzada2", "granada_lanzada3", "granada_lanzada4");
+                partida[anterior_array][anterior_posicion] = TEXTO;
                 movimiento = false;
+                cargar();
                 return;
             }
             if (partida[anterior_array][anterior_posicion] != PROTA) {
-                ELEMENTO.classList.remove("granada_lanzada");
+                ELEMENTO.classList.remove("granada_lanzada1", "granada_lanzada2", "granada_lanzada3", "granada_lanzada4");
                 partida[anterior_array][anterior_posicion] = TEXTO;
             }
-            NUEVO_ELEMENTO.classList.add("granada_lanzada");
+            clase++;
+            if (clase > 4) clase = 1;
+            NUEVO_ELEMENTO.classList.add("granada_lanzada" + clase);
             partida[nuevo_array][nueva_posicion] = GRANADA;
+            cargar();
         }, velocidad_granada * x);
     }
 
@@ -1215,7 +1236,6 @@ function lanzar_granada() {
 
 function verdelante_granada(ejex, ejey) {
     const ELEMENTO = conseguir_elemento(ejex, ejey);
-    const ID = ELEMENTO.id;
     if (!ELEMENTO) return;
     switch (partida[ejey][ejex]) {
         case FUEGO:
@@ -1229,26 +1249,43 @@ function verdelante_granada(ejex, ejey) {
 }
 
 function activar_granada(ejex, ejey) {
-    for (let x = 0; x <= 3; x++) {
-        for (let y = -1; y <= 1; y++) {
-            for (let z = -1; z <= 1; z++) {
-                const nx = ejex + x;
-                const ny = ejey + y;
-                const ELEMENTO = conseguir_elemento(nx, ny);
-                if (!ELEMENTO) continue;
-                switch (partida[ny][nx]) {
-                    case FUEGO:
-                    case ENEMIGO:
-                        ELEMENTO.removeAttribute("data-visto");
-                        ELEMENTO.classList.remove("fuego", "enemigo");
-                        ELEMENTO.removeAttribute("id");
-                        ELEMENTO.style.removeProperty("transform");
-                        partida[ny][nx] = TEXTO;
-                        restar_fuego();
-                        break;
-                }
+    const RADIO = 2;
+    for (let x = -RADIO; x <= RADIO; x++) {
+        for (let y = -RADIO; y <= RADIO; y++) {
+            const nx = ejex + x;
+            const ny = ejey + y;
+            const ELEMENTO = conseguir_elemento(nx, ny);
+            if (!ELEMENTO) continue;
+            switch (partida[ny][nx]) {
+                case ENEMIGO:
+                    ELEMENTO.style.removeProperty("transform");
+                    enemigos_derrotados++;
+                    ENEMIGOS.textContent = enemigos_derrotados;
+                    dropear_objeto(ejex + x, ejey + y);
+                case FUEGO:
+                    ELEMENTO.removeAttribute("data-visto");
+                    ELEMENTO.classList.remove("fuego", "enemigo");
+                    ELEMENTO.removeAttribute("id");
+                    partida[ny][nx] = TEXTO;
+                    restar_fuego();
+                    break;
+            }
+            if ((x) == 0 && (y) == 0) {
+                ELEMENTO.classList.add("impacto");
+            } else if ((x == 1 || x == 0 || x == -1) && (y == -1 || y == 1 || y == 0)) {
+                ELEMENTO.classList.add("radio1");
+            } else {
+                ELEMENTO.classList.add("radio2");
             }
         }
+        cargar();
+        cambiar_fondo();
     }
-    cargar();
+    setTimeout(() => {
+        const ELEMENTOS = document.querySelectorAll(".impacto, .radio1, .radio2");
+        for (let element of ELEMENTOS) {
+            element.classList.remove("impacto", "radio1", "radio2");
+        }
+    }, 300);
+
 }
