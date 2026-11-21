@@ -560,7 +560,7 @@ function crear_bala() {
             partida[nuevo_array].splice(nueva_posicion, 1, FUEGO);
             ELEMENTO.classList.add("fuego");
             ELEMENTO.dataset.visto = "visto";
-            dropear_objeto(nueva_posicion, nuevo_array);
+            if (dropear_objeto(nueva_posicion, nuevo_array)) restar_fuego();
             cargar();
             return;
         case VENDAS:
@@ -664,9 +664,9 @@ function verdelante_bala(nuevo_ejex, nuevo_ejey, ejex, ejey) {
                 ELEMENTO_NUEVO.classList.add("fuego");
                 partida[ejey].splice(ejex, 1, TEXTO);
                 partida[nuevo_ejey].splice(nuevo_ejex, 1, FUEGO);
+                if (dropear_objeto(nuevo_ejex, nuevo_ejey)) restar_fuego();
                 enemigos_derrotados++;
                 ENEMIGOS.textContent = enemigos_derrotados;
-                dropear_objeto(nuevo_ejex, nuevo_ejey);
                 cambiar_fondo();
                 cargar();
                 return false;
@@ -927,6 +927,12 @@ function verdelante_enemigo(ejex, ejey) {
             return false;
         case BALA:
             return false;
+        case VENDAS:
+        case PLASM_CANON:
+        case GRANADA:
+        case PISTOLA:
+            sumar_fuego();
+            return true;
         default:
             return true;
     }
@@ -1046,12 +1052,14 @@ function dropear_objeto(ejex, ejey) {
     }
 
     if (nombre) {
-        if (partida[ejey][ejex] == FUEGO) restar_fuego();
         partida[ejey][ejex] = simbolo;
         ELEMENTO.id = "id_" + nombre;
         ELEMENTO.classList.remove("fuego");
         ELEMENTO.removeAttribute("data-visto");
+        return true;
     }
+    return false;
+
 }
 
 //Funciones encargadas de gestionar las cuentas de las casillas quemadas y restantes
@@ -1149,14 +1157,15 @@ function verdelante_plasm_bullet(ejex, ejey) {
             return true;
         case ENEMIGO:
             ELEMENTO.classList.remove("enemigo", "fuego");
+            ELEMENTO.removeAttribute("data-visto");
             ELEMENTO.removeAttribute("id");
             ELEMENTO.style.removeProperty("transform");
-            partida[ejey].splice(ejex, 1, TEXTO);
+            partida[ejey][ejex] = TEXTO;
+            restar_fuego();
             enemigos_derrotados++;
             ENEMIGOS.textContent = enemigos_derrotados;
             dropear_objeto(ejex, ejey);
             cambiar_fondo();
-            if (partida[ejey][ejex] == TEXTO) restar_fuego();
             cargar();
             return true;
     }
@@ -1166,10 +1175,7 @@ function verdelante_plasm_bullet(ejex, ejey) {
 function lanzar_granada() {
     const PROTAGONISTA = document.getElementById("protagonista");
     var movimiento = true;
-    var nuevo_array;
-    var nueva_posicion;
-    var anterior_array;
-    var anterior_posicion;
+    let nuevo_array, nueva_posicion, anterior_array, anterior_posicion;
     const DIR = direccion;
     var clase = 0;
 
@@ -1215,7 +1221,9 @@ function lanzar_granada() {
             }
             if (!verdelante_granada(nueva_posicion, nuevo_array)) {
                 ELEMENTO.classList.remove("granada_lanzada1", "granada_lanzada2", "granada_lanzada3", "granada_lanzada4");
-                partida[anterior_array][anterior_posicion] = TEXTO;
+                if (partida[anterior_array][anterior_posicion] == GRANADA) {
+                    partida[anterior_array][anterior_posicion] = TEXTO;
+                }
                 movimiento = false;
                 cargar();
                 return;
@@ -1250,6 +1258,8 @@ function verdelante_granada(ejex, ejey) {
 
 function activar_granada(ejex, ejey) {
     const RADIO = 2;
+    const NUMERO = numero_granada;
+    numero_granada++;
     for (let x = -RADIO; x <= RADIO; x++) {
         for (let y = -RADIO; y <= RADIO; y++) {
             const nx = ejex + x;
@@ -1258,18 +1268,24 @@ function activar_granada(ejex, ejey) {
             if (!ELEMENTO) continue;
             switch (partida[ny][nx]) {
                 case ENEMIGO:
-                    ELEMENTO.style.removeProperty("transform");
-                    enemigos_derrotados++;
-                    ENEMIGOS.textContent = enemigos_derrotados;
-                    dropear_objeto(ejex + x, ejey + y);
-                case FUEGO:
                     ELEMENTO.removeAttribute("data-visto");
                     ELEMENTO.classList.remove("fuego", "enemigo");
+                    ELEMENTO.style.removeProperty("transform");
                     ELEMENTO.removeAttribute("id");
+                    partida[ny][nx] = TEXTO;
+                    restar_fuego();
+                    enemigos_derrotados++;
+                    ENEMIGOS.textContent = enemigos_derrotados;
+                    dropear_objeto(nx, ny);
+                    break;
+                case FUEGO:
+                    ELEMENTO.removeAttribute("data-visto");
+                    ELEMENTO.classList.remove("fuego");
                     partida[ny][nx] = TEXTO;
                     restar_fuego();
                     break;
             }
+            ELEMENTO.classList.add("numero_granada" + NUMERO);
             if ((x) == 0 && (y) == 0) {
                 ELEMENTO.classList.add("impacto");
             } else if ((x == 1 || x == 0 || x == -1) && (y == -1 || y == 1 || y == 0)) {
@@ -1282,10 +1298,9 @@ function activar_granada(ejex, ejey) {
         cambiar_fondo();
     }
     setTimeout(() => {
-        const ELEMENTOS = document.querySelectorAll(".impacto, .radio1, .radio2");
+        const ELEMENTOS = document.querySelectorAll(".numero_granada" + NUMERO);
         for (let element of ELEMENTOS) {
-            element.classList.remove("impacto", "radio1", "radio2");
+            element.classList.remove("impacto", "radio1", "radio2", "numero_granada" + NUMERO);
         }
     }, 300);
-
 }
