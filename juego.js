@@ -204,7 +204,7 @@ function verdelante(ejex, ejey) {
             ELEMENTO.removeAttribute("id");
             ELEMENTO.textContent = TEXTO;
             partida[ejey][ejex] = TEXTO;
-            inventario.pistola = objetos.pistola;
+            inventario.push({ "nombre": 'pistola', "ruta": objetos.pistola, "cantidad": 1 });
             cargar_inventario();
             insertar_fuego();
             esparcir_fuego();
@@ -215,7 +215,7 @@ function verdelante(ejex, ejey) {
             ELEMENTO.removeAttribute("id");
             ELEMENTO.textContent = TEXTO;
             partida[ejey][ejex] = TEXTO;
-            inventario.plasm_canon = objetos.plasm_canon;
+            inventario.push({ "nombre": 'plasm_canon', "ruta": objetos.plasm_canon, "cantidad": 1 });
             cargar_inventario();
             break;
         case VENDAS:
@@ -223,7 +223,12 @@ function verdelante(ejex, ejey) {
             ELEMENTO.removeAttribute("id");
             ELEMENTO.textContent = TEXTO;
             partida[ejey][ejex] = TEXTO;
-            inventario.vendas = objetos.vendas;
+            const vendas = inventario.find(o => o.nombre === "vendas");
+            if (vendas) {
+                vendas.cantidad += 1;
+            } else {
+                inventario.push({ "nombre": 'vendas', "ruta": objetos.vendas, "cantidad": 1 });
+            }
             cargar_inventario();
             break;
         case GRANADA:
@@ -231,7 +236,12 @@ function verdelante(ejex, ejey) {
             ELEMENTO.removeAttribute("id");
             ELEMENTO.textContent = TEXTO;
             partida[ejey][ejex] = TEXTO;
-            inventario.granada = objetos.granada;
+            const granada = inventario.find(o => o.nombre === "granada");
+            if (granada) {
+                granada.cantidad += 5;
+            } else {
+                inventario.push({ "nombre": 'granada', "ruta": objetos.granada, "cantidad": 5 });
+            }
             cargar_inventario();
             break;
         case BALA:
@@ -422,28 +432,28 @@ document.addEventListener('keydown', event => {
     if (vida <= 0) return;
     switch (event.key) {
         case '1':
-            if (Object.keys(inventario).length !== 0) {
+            if (inventario.length !== 0) {
                 i = 0;
             }
             break;
 
         case '2':
-            if (Object.keys(inventario).length > 1) {
+            if (inventario.length > 1) {
                 i = 1;
             }
             break;
         case '3':
-            if (Object.keys(inventario).length > 2) {
+            if (inventario.length > 2) {
                 i = 2;
             }
             break;
         case '4':
-            if (Object.keys(inventario).length > 2) {
+            if (inventario.length > 3) {
                 i = 3;
             }
             break;
         case '5':
-            if (Object.keys(inventario).length > 2) {
+            if (inventario.length > 4) {
                 i = 4;
             }
             break;
@@ -451,7 +461,7 @@ document.addEventListener('keydown', event => {
     if (i === undefined) return;
     if (!equipado) {
         SLOTS_INVENTARIO[i].classList.add("equipado");
-        equipado = Object.keys(inventario)[i];
+        equipado = inventario[i].nombre;
     } else {
         if (SLOTS_INVENTARIO[i].classList.contains("equipado")) {
             SLOTS_INVENTARIO[i].classList.remove("equipado");
@@ -460,7 +470,7 @@ document.addEventListener('keydown', event => {
             const SLOT_EQUIPADO = document.querySelector(".equipado")
             SLOT_EQUIPADO.classList.remove("equipado");
             SLOTS_INVENTARIO[i].classList.add("equipado");
-            equipado = Object.keys(inventario)[i];
+            equipado = inventario[i].nombre;
         }
     }
 
@@ -849,9 +859,9 @@ function cargar_inventario() {
         foto.src = "";
         foto.classList.remove("foto_objeto");
     }
-    for (let x = 0; x < Object.keys(inventario).length; x++) {
-        const CLAVE = Object.keys(inventario)[x];
-        const RUTA = inventario[CLAVE];
+    for (let x = 0; x < inventario.length; x++) {
+        const OBJETO = inventario[x];
+        const RUTA = OBJETO.ruta;
         const ELEMENTO = FOTOS_INVENTARIO[x];
         ELEMENTO.classList.add("foto_objeto");
         ELEMENTO.src = RUTA;
@@ -1034,19 +1044,42 @@ function mover_enemigo(id) {
 
 function dropear_objeto(ejex, ejey) {
     const NUMERO_RANDOM = Math.floor(Math.random() * 101);
+    var objeto_plasm_canon;
+    var objeto_vendas;
+    var objeto_granada;
+    for (let objeto of inventario) {
+        switch (objeto.nombre) {
+            case "plasm_canon":
+                objeto_plasm_canon = objeto;
+                break;
+            case "vendas":
+                objeto_vendas = objeto;
+                break;
+            case "granada":
+                objeto_granada = objeto;
+                break;
+        }
+    }
     const ELEMENTO = conseguir_elemento(ejex, ejey);
     if (!ELEMENTO) return;
 
     let nombre;
     let simbolo;
 
-    if (NUMERO_RANDOM < DROP_PLASM_CANON && !inventario.plasm_canon && !document.getElementById("id_plasm_canon")) {
+    if (NUMERO_RANDOM < DROP_PLASM_CANON && !objeto_plasm_canon && !document.getElementById("id_plasm_canon")) {
         nombre = "plasm_canon";
         simbolo = PLASM_CANON;
-    } else if (NUMERO_RANDOM < DROP_VENDAS && !inventario.vendas && !document.getElementById("id_vendas")) {
-        nombre = "vendas";
-        simbolo = VENDAS;
-    } else if (NUMERO_RANDOM < DROP_GRANADA && !inventario.granada && !document.getElementById("id_granada")) {
+    } else if (NUMERO_RANDOM < DROP_VENDAS) {
+        const NUM_VENDAS = document.querySelectorAll("#id_vendas").length;
+        const CANTIDAD = objeto_vendas?.cantidad ?? 0;
+        console.log(NUM_VENDAS);
+        if (CANTIDAD + NUM_VENDAS < 10) {
+            nombre = "vendas";
+            simbolo = VENDAS;
+        } else {
+            return;
+        }
+    } else if (NUMERO_RANDOM < DROP_GRANADA && !objeto_granada && !document.getElementById("id_granada")) {
         nombre = "granada";
         simbolo = GRANADA;
     }

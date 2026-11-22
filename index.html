@@ -100,11 +100,11 @@
             'plasm_canon': '../img/plasm_canon.png',
             'granada': '../img/granada.png'
         }
-        var inventario = {};
+        var inventario = [];
         var equipado = "";
         var vida = 3;
         var tiempo_de_juego = 0;
-        var velocidad_fuego = 5000;
+        var velocidad_fuego = 15000;
         var velocidad_spawn_fuego = 2;
 
         //VARIABLES DE LOS ENEMIGOS 
@@ -136,7 +136,7 @@
 
         //PROBABILIDADES DROPS (1-100)
         const DROP_PLASM_CANON = 5;
-        const DROP_VENDAS = 20;
+        const DROP_VENDAS = 50;
         const DROP_GRANADA = 80;
 
         //FUNCIONES PARA EL INICIO DE LA PARTIDA
