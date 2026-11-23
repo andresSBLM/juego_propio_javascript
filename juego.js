@@ -862,6 +862,8 @@ function cargar_inventario() {
     for (let x = 0; x < inventario.length; x++) {
         const OBJETO = inventario[x];
         const RUTA = OBJETO.ruta;
+        const CANTIDAD = SLOTS_INVENTARIO[x].lastElementChild;
+        CANTIDAD.textContent = OBJETO.cantidad;
         const ELEMENTO = FOTOS_INVENTARIO[x];
         ELEMENTO.classList.add("foto_objeto");
         ELEMENTO.src = RUTA;
@@ -1119,6 +1121,8 @@ function conseguir_elemento(ejex, ejey) {
     return document.querySelector(`[data-ejex="${ejex}"][data-ejey="${ejey}"]`);
 }
 
+//Funcion que crea las balas de plasma que recorren todo en linea recta
+
 function crear_plasm_bullet() {
     const EL_PROTA = document.getElementById("protagonista");
     if (!EL_PROTA) return;
@@ -1176,6 +1180,8 @@ function crear_plasm_bullet() {
     }, velocidad_plasm_bullet)
 }
 
+//Función que mira delante de las plasm_bullet
+
 function verdelante_plasm_bullet(ejex, ejey) {
     const ELEMENTO = conseguir_elemento(ejex, ejey);
     if (!ELEMENTO) return false;
@@ -1204,6 +1210,8 @@ function verdelante_plasm_bullet(ejex, ejey) {
     }
     return true;
 }
+
+//Funcion que lanza la granada
 
 function lanzar_granada() {
     const PROTAGONISTA = document.getElementById("protagonista");
@@ -1275,19 +1283,26 @@ function lanzar_granada() {
 
 }
 
+//Funcion que ve delante de la granada
+
 function verdelante_granada(ejex, ejey) {
     const ELEMENTO = conseguir_elemento(ejex, ejey);
     if (!ELEMENTO) return;
     switch (partida[ejey][ejex]) {
+        case TEXTO:
+            return true;
         case FUEGO:
         case ENEMIGO:
             activar_granada(ejex, ejey);
             return false;
         case PROTA:
             return false;
+        default: 
+            return false;
     }
-    return true;
 }
+
+//Funcion que activa la granada
 
 function activar_granada(ejex, ejey) {
     const RADIO = 2;
@@ -1317,15 +1332,18 @@ function activar_granada(ejex, ejey) {
                     partida[ny][nx] = TEXTO;
                     restar_fuego();
                     break;
+                case TEXTO:
+                case FUEGO:
+                    ELEMENTO.classList.add("numero_granada" + NUMERO);
+                    if ((x) == 0 && (y) == 0) {
+                        ELEMENTO.classList.add("impacto");
+                    } else if ((x == 1 || x == 0 || x == -1) && (y == -1 || y == 1 || y == 0)) {
+                        ELEMENTO.classList.add("radio1");
+                    } else {
+                        ELEMENTO.classList.add("radio2");
+                    }
             }
-            ELEMENTO.classList.add("numero_granada" + NUMERO);
-            if ((x) == 0 && (y) == 0) {
-                ELEMENTO.classList.add("impacto");
-            } else if ((x == 1 || x == 0 || x == -1) && (y == -1 || y == 1 || y == 0)) {
-                ELEMENTO.classList.add("radio1");
-            } else {
-                ELEMENTO.classList.add("radio2");
-            }
+
         }
         cargar();
         cambiar_fondo();
