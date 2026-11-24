@@ -476,31 +476,6 @@ document.addEventListener('keydown', event => {
 
 });
 
-//Encargado de detectar cuando puede usarse un objeto con un click
-
-document.addEventListener('click', () => {
-    const ahora = Date.now();
-    if (ahora - ultimo_click < COOLDOWN_CLICK || vida <= 0) return;
-    ultimo_click = ahora;
-
-    if (equipado == "pistola") {
-        crear_bala();
-    } else if (equipado == "vendas") {
-        if (vida < 3 && vida > 0) {
-            const SLOT_EQUIPADO = document.querySelector(".equipado");
-            const FOTO = SLOT_EQUIPADO.lastElementChild;
-            SLOT_EQUIPADO.classList.remove("equipado");
-            FOTO.classList.remove("foto_objeto");
-            FOTO.removeAttribute("src");
-            equipado = "";
-            delete inventario.vendas;
-            vida++;
-            comprobar_vida();
-            cargar_inventario()
-        }
-    }
-});
-
 //Evento encargado de usar objetos
 
 document.addEventListener('keydown', (event) => {
@@ -510,13 +485,12 @@ document.addEventListener('keydown', (event) => {
         case 'Q':
             if (equipado == "vendas") {
                 if (vida < 3 && vida > 0) {
-                    const SLOT_EQUIPADO = document.querySelector(".equipado");
-                    const FOTO = SLOT_EQUIPADO.lastElementChild;
-                    SLOT_EQUIPADO.classList.remove("equipado");
-                    FOTO.classList.remove("foto_objeto");
-                    FOTO.removeAttribute("src");
-                    equipado = "";
-                    delete inventario.vendas;
+                    for (let objeto of inventario) {
+                        if (objeto.nombre == "vendas") {
+                            objeto_vendas = objeto;
+                        }
+                    }
+                    objeto_vendas.cantidad--;
                     vida++;
                     comprobar_vida();
                     cargar_inventario()
@@ -854,15 +828,27 @@ function derrota() {
 //Funcion encargada de gestionar el inventario
 
 function cargar_inventario() {
-    const FOTOS = document.getElementsByClassName("foto");
-    for (let foto of FOTOS) {
-        foto.src = "";
-        foto.classList.remove("foto_objeto");
+    const SLOTS = document.getElementsByClassName("slot");
+    for (let s of SLOTS) {
+        const FOTO = s.querySelector(".foto");
+        const CANTIDAD = s.querySelector(".cantidad");
+        FOTO.src = "";
+        FOTO.classList.remove("foto_objeto");
+        CANTIDAD.textContent = "";
     }
     for (let x = 0; x < inventario.length; x++) {
         const OBJETO = inventario[x];
+        if (OBJETO.cantidad == 0) {
+            const SLOT_EQUIPADO = document.querySelector(".equipado");
+            const CANTIDAD = SLOT_EQUIPADO.querySelector(".cantidad");
+            CANTIDAD.textContent = "";
+            SLOT_EQUIPADO.classList.remove("equipado");
+            equipado = "";
+            inventario.splice([inventario.indexOf(OBJETO)], 1);
+            return;
+        }
         const RUTA = OBJETO.ruta;
-        const CANTIDAD = SLOTS_INVENTARIO[x].lastElementChild;
+        const CANTIDAD = SLOTS_INVENTARIO[x].querySelector(".cantidad");
         CANTIDAD.textContent = OBJETO.cantidad;
         const ELEMENTO = FOTOS_INVENTARIO[x];
         ELEMENTO.classList.add("foto_objeto");
@@ -1074,7 +1060,6 @@ function dropear_objeto(ejex, ejey) {
     } else if (NUMERO_RANDOM < DROP_VENDAS) {
         const NUM_VENDAS = document.querySelectorAll("#id_vendas").length;
         const CANTIDAD = objeto_vendas?.cantidad ?? 0;
-        console.log(NUM_VENDAS);
         if (CANTIDAD + NUM_VENDAS < 10) {
             nombre = "vendas";
             simbolo = VENDAS;
@@ -1297,7 +1282,7 @@ function verdelante_granada(ejex, ejey) {
             return false;
         case PROTA:
             return false;
-        default: 
+        default:
             return false;
     }
 }
