@@ -238,7 +238,12 @@ function verdelante(ejex, ejey) {
             partida[ejey][ejex] = TEXTO;
             const granada = inventario.find(o => o.nombre === "granada");
             if (granada) {
-                granada.cantidad += 5;
+                if (granada.cantidad < 25) {
+                    granada.cantidad += 5;
+                } else {
+                    const RESTO = 30 - granada.cantidad;
+                    granada.cantidad += RESTO;
+                }
             } else {
                 inventario.push({ "nombre": 'granada', "ruta": objetos.granada, "cantidad": 5 });
             }
@@ -901,7 +906,9 @@ function spawnear_enemigo() {
             return;
         }
         if (vida <= 0) return;
-        const LUGARES_DISPONIBLES = document.querySelectorAll(".casilla:not(.fuego):not([id]):not(.plasm_bullet):not([class^='granada_lanzada'])");
+        const LUGARES_DISPONIBLES = document.querySelectorAll(
+            ".casilla:not(.fuego, .plasm_bullet):not([id]):not([class^='granada_lanzada'])"
+        );
         if (LUGARES_DISPONIBLES.length === 0) return;
         sumar_fuego();
         const NUM_RANDOM = Math.floor(Math.random() * (LUGARES_DISPONIBLES.length));
@@ -1065,7 +1072,7 @@ function dropear_objeto(ejex, ejey) {
         }
     } else if (NUMERO_RANDOM < DROP_GRANADA) {
         const NUM_GRANADAS = (document.querySelectorAll("#id_granada").length) * 5;
-        const CANTIDAD = objeto_granada.cantidad;
+        const CANTIDAD = objeto_granada?.cantidad ?? 0;
         if (CANTIDAD + NUM_GRANADAS < 30) {
             nombre = "granada";
             simbolo = GRANADA;
@@ -1245,7 +1252,10 @@ function lanzar_granada() {
             if (!NUEVO_ELEMENTO) {
                 movimiento = false;
                 ELEMENTO.classList.remove("granada_lanzada1", "granada_lanzada2", "granada_lanzada3", "granada_lanzada4");
-                partida[anterior_array][anterior_posicion] = TEXTO;
+                if (partida[anterior_array][anterior_posicion] == GRANADA) {
+                    partida[anterior_array][anterior_posicion] = TEXTO;
+                }
+                cargar();
                 return;
             }
             if (!verdelante_granada(nueva_posicion, nuevo_array)) {
@@ -1257,14 +1267,16 @@ function lanzar_granada() {
                 cargar();
                 return;
             }
-            if (partida[anterior_array][anterior_posicion] != PROTA) {
-                ELEMENTO.classList.remove("granada_lanzada1", "granada_lanzada2", "granada_lanzada3", "granada_lanzada4");
+            ELEMENTO.classList.remove("granada_lanzada1", "granada_lanzada2", "granada_lanzada3", "granada_lanzada4");
+            if (partida[anterior_array][anterior_posicion] == GRANADA) {
                 partida[anterior_array][anterior_posicion] = TEXTO;
             }
-            clase++;
-            if (clase > 4) clase = 1;
-            NUEVO_ELEMENTO.classList.add("granada_lanzada" + clase);
-            partida[nuevo_array][nueva_posicion] = GRANADA;
+            if (partida[nuevo_array][nueva_posicion] == TEXTO) {
+                clase++;
+                if (clase > 4) clase = 1;
+                NUEVO_ELEMENTO.classList.add("granada_lanzada" + clase);
+                partida[nuevo_array][nueva_posicion] = GRANADA;
+            }
             cargar();
         }, velocidad_granada * x);
     }
@@ -1286,6 +1298,7 @@ function verdelante_granada(ejex, ejey) {
         case PROTA:
             return false;
         default:
+            activar_granada(ejex, ejey);
             return false;
     }
 }
