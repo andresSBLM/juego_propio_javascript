@@ -367,26 +367,35 @@ document.addEventListener('keydown', event => {
                 break;
         }
     } else if (equipado == "granada") {
+        var objeto_granada = inventario.find(o => o.nombre === "granada");
         switch (event.key) {
             case 'ArrowUp':
                 PROTAGONISTA.style.transform = "rotate(180deg)";
                 direccion = 'norte';
                 lanzar_granada();
+                objeto_granada.cantidad--;
+                cargar_inventario();
                 break;
             case 'ArrowDown':
                 PROTAGONISTA.style.transform = "rotate(0deg)";
                 direccion = 'sur';
                 lanzar_granada();
+                objeto_granada.cantidad--;
+                cargar_inventario();
                 break;
             case 'ArrowLeft':
                 PROTAGONISTA.style.transform = "rotate(90deg)";
                 direccion = 'este';
                 lanzar_granada();
+                objeto_granada.cantidad--;
+                cargar_inventario();
                 break;
             case 'ArrowRight':
                 PROTAGONISTA.style.transform = "rotate(-90deg)";
                 direccion = 'oeste';
                 lanzar_granada();
+                objeto_granada.cantidad--;
+                cargar_inventario();
                 break;
         }
     }
@@ -845,7 +854,8 @@ function cargar_inventario() {
             SLOT_EQUIPADO.classList.remove("equipado");
             equipado = "";
             inventario.splice([inventario.indexOf(OBJETO)], 1);
-            return;
+            x--;
+            continue;
         }
         const RUTA = OBJETO.ruta;
         const CANTIDAD = SLOTS_INVENTARIO[x].querySelector(".cantidad");
@@ -1032,22 +1042,9 @@ function mover_enemigo(id) {
 
 function dropear_objeto(ejex, ejey) {
     const NUMERO_RANDOM = Math.floor(Math.random() * 101);
-    var objeto_plasm_canon;
-    var objeto_vendas;
-    var objeto_granada;
-    for (let objeto of inventario) {
-        switch (objeto.nombre) {
-            case "plasm_canon":
-                objeto_plasm_canon = objeto;
-                break;
-            case "vendas":
-                objeto_vendas = objeto;
-                break;
-            case "granada":
-                objeto_granada = objeto;
-                break;
-        }
-    }
+    var objeto_plasm_canon = inventario.find(o => o.nombre == "plasm_canon");
+    var objeto_vendas = inventario.find(o => o.nombre == "vendas");
+    var objeto_granada = inventario.find(o => o.nombre == "granada");
     const ELEMENTO = conseguir_elemento(ejex, ejey);
     if (!ELEMENTO) return;
 
@@ -1066,9 +1063,15 @@ function dropear_objeto(ejex, ejey) {
         } else {
             return;
         }
-    } else if (NUMERO_RANDOM < DROP_GRANADA && !objeto_granada && !document.getElementById("id_granada")) {
-        nombre = "granada";
-        simbolo = GRANADA;
+    } else if (NUMERO_RANDOM < DROP_GRANADA) {
+        const NUM_GRANADAS = (document.querySelectorAll("#id_granada").length) * 5;
+        const CANTIDAD = objeto_granada.cantidad;
+        if (CANTIDAD + NUM_GRANADAS < 30) {
+            nombre = "granada";
+            simbolo = GRANADA;
+        } else {
+            return;
+        }
     }
 
     if (nombre) {
@@ -1317,16 +1320,14 @@ function activar_granada(ejex, ejey) {
                     partida[ny][nx] = TEXTO;
                     restar_fuego();
                     break;
-                case TEXTO:
-                case FUEGO:
-                    ELEMENTO.classList.add("numero_granada" + NUMERO);
-                    if ((x) == 0 && (y) == 0) {
-                        ELEMENTO.classList.add("impacto");
-                    } else if ((x == 1 || x == 0 || x == -1) && (y == -1 || y == 1 || y == 0)) {
-                        ELEMENTO.classList.add("radio1");
-                    } else {
-                        ELEMENTO.classList.add("radio2");
-                    }
+            }
+            ELEMENTO.classList.add("numero_granada" + NUMERO);
+            if ((x) == 0 && (y) == 0) {
+                ELEMENTO.classList.add("impacto");
+            } else if ((x == 1 || x == 0 || x == -1) && (y == -1 || y == 1 || y == 0)) {
+                ELEMENTO.classList.add("radio1");
+            } else {
+                ELEMENTO.classList.add("radio2");
             }
 
         }
