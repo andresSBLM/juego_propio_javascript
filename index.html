@@ -64,7 +64,7 @@
             <p id="cantidad_suerte"></p>
             <img src="img/info.avif" id="info_probabilidad">
         </div>
-        <p id="press_z">Press Z</p>
+        <p id="press_z">Press Z / click</p>
         <div id="probabilidad_objetos">
         </div>
     </section>
@@ -129,7 +129,7 @@
         //VARIABLES DE LOS ENEMIGOS 
         var id_enemigo = 1;
         var velocidad_enemigo = 5000;
-        var ratio_spawneo = 1000;
+        var ratio_spawneo = 3000;
         var enemigos_derrotados = 0;
         var spawnear_enemigos = true;
 
@@ -157,6 +157,9 @@
         const INCREMENTO_SUERTE = 0.1;
         var suerte = 0;
         const DROPS = {"plasm_canon": 1, "vendas":10, "granada":5};
+        const MAX_VENDAS = 10;
+        const MAX_GRANADAS = 30;
+        const MAX_OBJETOS = 1;
 
         //FUNCIONES PARA EL INICIO DE LA PARTIDA
         SUERTE.textContent = suerte;

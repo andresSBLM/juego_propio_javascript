@@ -87,7 +87,6 @@ function spawnear_jugador() {
 //Funcion encargada de insertar aleatoriamente fuego en los bordes
 
 function spawnear_fuego() {
-    if (casillas_quemadas === 0) return;
     const PARED_RANDOM = Math.floor(Math.random() * 5);
     const POSICION = Math.floor(Math.random() * TAMAÑO);
     var nuevo_array;
@@ -172,7 +171,7 @@ function verdelante(ejex, ejey) {
             ELEMENTO.removeAttribute("id");
             ELEMENTO.textContent = TEXTO;
             partida[ejey][ejex] = TEXTO;
-            inventario.push({ "nombre": 'pistola', "ruta": objetos.pistola, "cantidad": 1 });
+            inventario.push({ "nombre": 'pistola', "ruta": objetos.pistola, "cantidad": 1 , "maximo": MAX_OBJETOS});
             cargar_inventario();
             esparcir_fuego();
             spawnear_enemigo();
@@ -182,7 +181,7 @@ function verdelante(ejex, ejey) {
             ELEMENTO.removeAttribute("id");
             ELEMENTO.textContent = TEXTO;
             partida[ejey][ejex] = TEXTO;
-            inventario.push({ "nombre": 'plasm_canon', "ruta": objetos.plasm_canon, "cantidad": 1 });
+            inventario.push({ "nombre": 'plasm_canon', "ruta": objetos.plasm_canon, "cantidad": 1 , "maximo": MAX_OBJETOS});
             cargar_inventario();
             break;
         case VENDAS:
@@ -194,7 +193,7 @@ function verdelante(ejex, ejey) {
             if (vendas) {
                 vendas.cantidad += 1;
             } else {
-                inventario.push({ "nombre": 'vendas', "ruta": objetos.vendas, "cantidad": 1 });
+                inventario.push({ "nombre": 'vendas', "ruta": objetos.vendas, "cantidad": 1 , "maximo":MAX_VENDAS});
             }
             cargar_inventario();
             break;
@@ -212,7 +211,7 @@ function verdelante(ejex, ejey) {
                     granada.cantidad += RESTO;
                 }
             } else {
-                inventario.push({ "nombre": 'granada', "ruta": objetos.granada, "cantidad": 5 });
+                inventario.push({ "nombre": 'granada', "ruta": objetos.granada, "cantidad": 5 , "maximo":MAX_GRANADAS});
             }
             cargar_inventario();
             break;
@@ -814,6 +813,7 @@ function cargar_inventario() {
         FOTO.src = "";
         FOTO.classList.remove("foto_objeto");
         CANTIDAD.textContent = "";
+        CANTIDAD.classList.remove("full");
     }
     for (let x = 0; x < inventario.length; x++) {
         const OBJETO = inventario[x];
@@ -827,9 +827,13 @@ function cargar_inventario() {
             x--;
             continue;
         }
-        const RUTA = OBJETO.ruta;
         const CANTIDAD = SLOTS_INVENTARIO[x].querySelector(".cantidad");
+        if (OBJETO.cantidad == OBJETO.maximo) {
+            CANTIDAD.classList.add("full");
+        }
+        
         CANTIDAD.textContent = OBJETO.cantidad;
+        const RUTA = OBJETO.ruta;
         const ELEMENTO = FOTOS_INVENTARIO[x];
         ELEMENTO.classList.add("foto_objeto");
         ELEMENTO.src = RUTA;
@@ -842,7 +846,7 @@ function avanzar_tiempo() {
     setTimeout(() => {
         tiempo_de_juego++;
         TIEMPO.textContent = tiempo_de_juego;
-        if (tiempo_de_juego % velocidad_spawn_fuego == 0 && Object.keys(inventario).length !== 0) {
+        if (tiempo_de_juego % velocidad_spawn_fuego == 0 && inventario.length !== 0) {
             for (let x = 0; x <= 5; x++)spawnear_fuego();
         }
         if (casillas_quemadas < 300 && !spawnear_enemigos) {
@@ -1035,7 +1039,7 @@ function dropear_objeto(ejex, ejey) {
     else if (NUMERO_RANDOM < (DROPS.granada + suerte)) {
         const NUM_GRANADAS = (document.querySelectorAll("#id_granada").length) * 5;
         const CANTIDAD = objeto_granada?.cantidad ?? 0;
-        if (CANTIDAD + NUM_GRANADAS < 30) {
+        if (CANTIDAD + NUM_GRANADAS < MAX_GRANADAS) {
             nombre = "granada";
             simbolo = GRANADA;
         } else {
@@ -1045,7 +1049,7 @@ function dropear_objeto(ejex, ejey) {
     else if (NUMERO_RANDOM < (DROPS.vendas + suerte)) {
         const NUM_VENDAS = document.querySelectorAll("#id_vendas").length;
         const CANTIDAD = objeto_vendas?.cantidad ?? 0;
-        if (CANTIDAD + NUM_VENDAS < 10) {
+        if (CANTIDAD + NUM_VENDAS < MAX_VENDAS) {
             nombre = "vendas";
             simbolo = VENDAS;
         } else {

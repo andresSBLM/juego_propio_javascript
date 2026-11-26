@@ -189,13 +189,13 @@
 }
 
 .cantidad {
-    color: rgb(54, 3, 3);
     font-weight: bold;
     position: absolute;
     bottom: 5px;
     right: 5px;
     font-size: calc(var(--lado * 0.04));
-    text-shadow: 2px 2px 2px rgba(255, 252, 252, 0.721);
+    color: rgb(46, 90, 10);
+    text-shadow: 1px 1px 1px rgb(13, 255, 0);
 }
 
 #principal #protagonista {
@@ -294,6 +294,11 @@
 #inventario .equipado .numero {
     color: black;
     text-shadow: 2px 2px 2px grey;
+}
+
+#inventario .full{
+    color: rgb(255, 2, 2);
+    text-shadow: 1px 1px 1px rgb(0, 0, 0);
 }
 
 .bala1,
