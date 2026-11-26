@@ -1,4 +1,3 @@
-
 /*Función encargada de cargar el tablero del juego donde transcurriran todos los
 acontecimientos de la partida. Devuelve un array con dos elementos,
 el tablero y un array que simula la lógica del tablero, el tablero contiene todas las fichas y
@@ -83,37 +82,6 @@ function spawnear_jugador() {
     player_array = EJE_Y;
     player_position = EJE_X;
     cargar();
-}
-
-//Función que inserta un incendio en una esquina aleatoria del juego
-
-function insertar_fuego() {
-    const ESQUINA = Math.floor(Math.random() * 4);
-    var ejex;
-    var ejey;
-    switch (ESQUINA) {
-        case 0:
-            ejex = 0;
-            ejey = 0;
-            break;
-        case 1:
-            ejex = 0;
-            ejey = TAMAÑO - 1;
-            break;
-        case 2:
-            ejex = TAMAÑO - 1;
-            ejey = 0;
-            break;
-        case 3:
-            ejex = TAMAÑO - 1;
-            ejey = TAMAÑO - 1;
-            break;
-    }
-    partida[ejey].splice(ejex, 1, FUEGO);
-    pos_fuego_inicio = [ejex, ejey];
-    const ELEMENTO = conseguir_elemento(ejex, ejey);
-    ELEMENTO.dataset.visto = "visto";
-    sumar_fuego();
 }
 
 //Funcion encargada de insertar aleatoriamente fuego en los bordes
@@ -206,7 +174,6 @@ function verdelante(ejex, ejey) {
             partida[ejey][ejex] = TEXTO;
             inventario.push({ "nombre": 'pistola', "ruta": objetos.pistola, "cantidad": 1 });
             cargar_inventario();
-            insertar_fuego();
             esparcir_fuego();
             spawnear_enemigo();
             break;
@@ -663,8 +630,6 @@ function verdelante_bala(nuevo_ejex, nuevo_ejey, ejex, ejey) {
                 partida[ejey].splice(ejex, 1, TEXTO);
                 partida[nuevo_ejey].splice(nuevo_ejex, 1, FUEGO);
                 if (dropear_objeto(nuevo_ejex, nuevo_ejey)) restar_fuego();
-                enemigos_derrotados++;
-                ENEMIGOS.textContent = enemigos_derrotados;
                 cambiar_fondo();
                 cargar();
                 return false;
@@ -1048,6 +1013,11 @@ function mover_enemigo(id) {
 //Funcion encargada de gestionar los dropeos de los enemigos
 
 function dropear_objeto(ejex, ejey) {
+    suerte += INCREMENTO_SUERTE;
+    SUERTE.textContent = suerte.toFixed(2);
+    actualizar_ventana_probabilidades();
+    enemigos_derrotados++;
+    ENEMIGOS.textContent = enemigos_derrotados;
     const NUMERO_RANDOM = Math.floor(Math.random() * 101);
     var objeto_plasm_canon = inventario.find(o => o.nombre == "plasm_canon");
     var objeto_vendas = inventario.find(o => o.nombre == "vendas");
@@ -1058,24 +1028,26 @@ function dropear_objeto(ejex, ejey) {
     let nombre;
     let simbolo;
 
-    if (NUMERO_RANDOM < DROP_PLASM_CANON && !objeto_plasm_canon && !document.getElementById("id_plasm_canon")) {
+    if (NUMERO_RANDOM < (DROPS.plasm_canon + suerte) && !objeto_plasm_canon && !document.getElementById("id_plasm_canon")) {
         nombre = "plasm_canon";
         simbolo = PLASM_CANON;
-    } else if (NUMERO_RANDOM < DROP_VENDAS) {
-        const NUM_VENDAS = document.querySelectorAll("#id_vendas").length;
-        const CANTIDAD = objeto_vendas?.cantidad ?? 0;
-        if (CANTIDAD + NUM_VENDAS < 10) {
-            nombre = "vendas";
-            simbolo = VENDAS;
-        } else {
-            return;
-        }
-    } else if (NUMERO_RANDOM < DROP_GRANADA) {
+    }
+    else if (NUMERO_RANDOM < (DROPS.granada + suerte)) {
         const NUM_GRANADAS = (document.querySelectorAll("#id_granada").length) * 5;
         const CANTIDAD = objeto_granada?.cantidad ?? 0;
         if (CANTIDAD + NUM_GRANADAS < 30) {
             nombre = "granada";
             simbolo = GRANADA;
+        } else {
+            return;
+        }
+    }
+    else if (NUMERO_RANDOM < (DROPS.vendas + suerte)) {
+        const NUM_VENDAS = document.querySelectorAll("#id_vendas").length;
+        const CANTIDAD = objeto_vendas?.cantidad ?? 0;
+        if (CANTIDAD + NUM_VENDAS < 10) {
+            nombre = "vendas";
+            simbolo = VENDAS;
         } else {
             return;
         }
@@ -1196,8 +1168,6 @@ function verdelante_plasm_bullet(ejex, ejey) {
             ELEMENTO.style.removeProperty("transform");
             partida[ejey][ejex] = TEXTO;
             restar_fuego();
-            enemigos_derrotados++;
-            ENEMIGOS.textContent = enemigos_derrotados;
             dropear_objeto(ejex, ejey);
             cambiar_fondo();
             cargar();
@@ -1323,8 +1293,6 @@ function activar_granada(ejex, ejey) {
                     ELEMENTO.removeAttribute("id");
                     partida[ny][nx] = TEXTO;
                     restar_fuego();
-                    enemigos_derrotados++;
-                    ENEMIGOS.textContent = enemigos_derrotados;
                     dropear_objeto(nx, ny);
                     break;
                 case FUEGO:
@@ -1353,4 +1321,58 @@ function activar_granada(ejex, ejey) {
             element.classList.remove("impacto", "radio1", "radio2", "numero_granada" + NUMERO);
         }
     }, 300);
+}
+
+//Evento encargado de llamar a abrir_ventana de probabilidades
+
+document.addEventListener('click', event => {
+    if (event.target == INFO_PROBABILIDAD) {
+        abrir_ventana_probabilidades();
+    }
+});
+
+document.addEventListener('keydown', event => {
+    switch (event.key) {
+        case "z":
+        case "Z":
+            abrir_ventana_probabilidades();
+    }
+});
+
+// Funcion encargada de mostrar las probabilidades de los objetos al pulsar el logo de info
+
+function abrir_ventana_probabilidades() {
+    const VENTANA = document.getElementById("probabilidad_objetos");
+    if (!ventana_pulsada) {
+        for (const [CLAVE, VALOR] of Object.entries(DROPS)) {
+            const CONTENEDOR_CENTRAL = document.createElement("div");
+            CONTENEDOR_CENTRAL.classList.add("contenedor_central_probabilidad");
+            const CONTENEDOR = document.createElement("div");
+            const TITULO = document.createElement("p");
+            const IMAGEN = document.createElement("img");
+            const PROBABILIDAD = document.createElement("p");
+            CONTENEDOR.classList.add("caja_probabilidad_arma");
+            TITULO.textContent = CLAVE;
+            IMAGEN.src = objetos[CLAVE];
+            PROBABILIDAD.textContent = VALOR + parseFloat(suerte.toFixed(2)) + "%";
+            CONTENEDOR_CENTRAL.appendChild(IMAGEN);
+            CONTENEDOR_CENTRAL.appendChild(PROBABILIDAD);
+            CONTENEDOR.appendChild(TITULO);
+            CONTENEDOR.appendChild(CONTENEDOR_CENTRAL);
+            VENTANA.appendChild(CONTENEDOR);
+        }
+        ventana_pulsada = true;
+    } else {
+        VENTANA.innerHTML = "";
+        ventana_pulsada = false;
+    }
+}
+
+function actualizar_ventana_probabilidades() {
+    const VENTANA = document.getElementById("probabilidad_objetos");
+    if (ventana_pulsada) {
+        VENTANA.innerHTML = "";
+        ventana_pulsada = false;
+        abrir_ventana_probabilidades();
+    }
 }
