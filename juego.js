@@ -857,7 +857,7 @@ function avanzar_tiempo() {
             velocidad_fuego *= 1.01;
             velocidad_enemigo *= 1.01;
             ratio_spawneo *= 1.01;
-        } else {
+        } else if (inventario.length !== 0){
             velocidad_fuego *= 0.99;
             velocidad_enemigo *= 0.99;
             ratio_spawneo *= 0.99;
