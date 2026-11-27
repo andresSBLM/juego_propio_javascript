@@ -181,7 +181,14 @@ function verdelante(ejex, ejey) {
             ELEMENTO.removeAttribute("id");
             ELEMENTO.textContent = TEXTO;
             partida[ejey][ejex] = TEXTO;
-            inventario.push({ "nombre": 'plasm_canon', "ruta": objetos.plasm_canon, "cantidad": 1 , "maximo": MAX_OBJETOS});
+            const EL_PLASM_CANON = inventario.find(o => o.nombre == "plasm_canon");
+            if (EL_PLASM_CANON) {
+                if (EL_PLASM_CANON.cantidad < MAX_PLASM_CANON) {
+                    EL_PLASM_CANON.cantidad = MAX_PLASM_CANON;
+                }
+            } else {
+                inventario.push({ "nombre": 'plasm_canon', "ruta": objetos.plasm_canon, "cantidad": 20 , "maximo": MAX_PLASM_CANON});
+            }
             cargar_inventario();
             break;
         case VENDAS:
@@ -202,13 +209,13 @@ function verdelante(ejex, ejey) {
             ELEMENTO.removeAttribute("id");
             ELEMENTO.textContent = TEXTO;
             partida[ejey][ejex] = TEXTO;
-            const granada = inventario.find(o => o.nombre === "granada");
-            if (granada) {
-                if (granada.cantidad < 25) {
-                    granada.cantidad += 5;
+            const EL_GRANADA = inventario.find(o => o.nombre === "granada");
+            if (EL_GRANADA) {
+                if (EL_GRANADA.cantidad < 25) {
+                    EL_GRANADA.cantidad += 5;
                 } else {
-                    const RESTO = 30 - granada.cantidad;
-                    granada.cantidad += RESTO;
+                    const RESTO = 30 - EL_GRANADA.cantidad;
+                    EL_GRANADA.cantidad += RESTO;
                 }
             } else {
                 inventario.push({ "nombre": 'granada', "ruta": objetos.granada, "cantidad": 5 , "maximo":MAX_GRANADAS});
@@ -315,23 +322,32 @@ document.addEventListener('keydown', event => {
                 break;
         }
     } else if (equipado == "plasm_canon") {
+        var objeto_plasm_canon = inventario.find(o => o.nombre == "plasm_canon");
         switch (event.key) {
             case 'ArrowUp':
+                objeto_plasm_canon.cantidad--;
+                cargar_inventario();
                 PROTAGONISTA.style.transform = "rotate(180deg)";
                 direccion = 'norte';
                 crear_plasm_bullet();
                 break;
             case 'ArrowDown':
+                objeto_plasm_canon.cantidad--;
+                cargar_inventario();
                 PROTAGONISTA.style.transform = "rotate(0deg)";
                 direccion = 'sur';
                 crear_plasm_bullet();
                 break;
             case 'ArrowLeft':
+                objeto_plasm_canon.cantidad--;
+                cargar_inventario();
                 PROTAGONISTA.style.transform = "rotate(90deg)";
                 direccion = 'este';
                 crear_plasm_bullet();
                 break;
             case 'ArrowRight':
+                objeto_plasm_canon.cantidad--;
+                cargar_inventario();
                 PROTAGONISTA.style.transform = "rotate(-90deg)";
                 direccion = 'oeste';
                 crear_plasm_bullet();
@@ -849,11 +865,11 @@ function avanzar_tiempo() {
         if (tiempo_de_juego % velocidad_spawn_fuego == 0 && inventario.length !== 0) {
             for (let x = 0; x <= 5; x++)spawnear_fuego();
         }
-        if (casillas_quemadas < 300 && !spawnear_enemigos) {
+        if (casillas_quemadas < (TAMAÑO * TAMAÑO - 10) && !spawnear_enemigos) {
             spawnear_enemigo();
             spawnear_enemigos = true;
-        }
-        if (casillas_quemadas > 300) {
+        } 
+        if (casillas_quemadas > (TAMAÑO * TAMAÑO - 10)) {
             velocidad_fuego *= 1.01;
             velocidad_enemigo *= 1.01;
             ratio_spawneo *= 1.01;
@@ -1031,10 +1047,15 @@ function dropear_objeto(ejex, ejey) {
 
     let nombre;
     let simbolo;
-
-    if (NUMERO_RANDOM < (DROPS.plasm_canon + suerte) && !objeto_plasm_canon && !document.getElementById("id_plasm_canon")) {
-        nombre = "plasm_canon";
-        simbolo = PLASM_CANON;
+    
+    if (NUMERO_RANDOM < (DROPS.plasm_canon + suerte) && !document.getElementById("id_plasm_canon")) {
+        const CANTIDAD = objeto_plasm_canon?.cantidad ?? 0;
+        if (CANTIDAD < MAX_PLASM_CANON) {
+            nombre = "plasm_canon";
+            simbolo = PLASM_CANON;
+        } else {
+            return;
+        }
     }
     else if (NUMERO_RANDOM < (DROPS.granada + suerte)) {
         const NUM_GRANADAS = (document.querySelectorAll("#id_granada").length) * 5;
