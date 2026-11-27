@@ -168,13 +168,13 @@ function verdelante(ejex, ejey) {
             break;
         case PISTOLA:
             avanzar = false;
+            spawnear_enemigo();
             ELEMENTO.removeAttribute("id");
             ELEMENTO.textContent = TEXTO;
             partida[ejey][ejex] = TEXTO;
-            inventario.push({ "nombre": 'pistola', "ruta": objetos.pistola, "cantidad": 1 , "maximo": MAX_OBJETOS});
+            inventario.push({ "nombre": 'pistola', "ruta": objetos.pistola, "cantidad": 1, "maximo": MAX_OBJETOS });
             cargar_inventario();
             esparcir_fuego();
-            spawnear_enemigo();
             break;
         case PLASM_CANON:
             avanzar = false;
@@ -187,7 +187,7 @@ function verdelante(ejex, ejey) {
                     EL_PLASM_CANON.cantidad = MAX_PLASM_CANON;
                 }
             } else {
-                inventario.push({ "nombre": 'plasm_canon', "ruta": objetos.plasm_canon, "cantidad": 20 , "maximo": MAX_PLASM_CANON});
+                inventario.push({ "nombre": 'plasm_canon', "ruta": objetos.plasm_canon, "cantidad": 20, "maximo": MAX_PLASM_CANON });
             }
             cargar_inventario();
             break;
@@ -200,7 +200,7 @@ function verdelante(ejex, ejey) {
             if (vendas) {
                 vendas.cantidad += 1;
             } else {
-                inventario.push({ "nombre": 'vendas', "ruta": objetos.vendas, "cantidad": 1 , "maximo":MAX_VENDAS});
+                inventario.push({ "nombre": 'vendas', "ruta": objetos.vendas, "cantidad": 1, "maximo": MAX_VENDAS });
             }
             cargar_inventario();
             break;
@@ -218,7 +218,7 @@ function verdelante(ejex, ejey) {
                     EL_GRANADA.cantidad += RESTO;
                 }
             } else {
-                inventario.push({ "nombre": 'granada', "ruta": objetos.granada, "cantidad": 5 , "maximo":MAX_GRANADAS});
+                inventario.push({ "nombre": 'granada', "ruta": objetos.granada, "cantidad": 5, "maximo": MAX_GRANADAS });
             }
             cargar_inventario();
             break;
@@ -847,7 +847,7 @@ function cargar_inventario() {
         if (OBJETO.cantidad == OBJETO.maximo) {
             CANTIDAD.classList.add("full");
         }
-        
+
         CANTIDAD.textContent = OBJETO.cantidad;
         const RUTA = OBJETO.ruta;
         const ELEMENTO = FOTOS_INVENTARIO[x];
@@ -865,15 +865,7 @@ function avanzar_tiempo() {
         if (tiempo_de_juego % velocidad_spawn_fuego == 0 && inventario.length !== 0) {
             for (let x = 0; x <= 5; x++)spawnear_fuego();
         }
-        if (casillas_quemadas < (TAMAÑO * TAMAÑO - 10) && !spawnear_enemigos) {
-            spawnear_enemigo();
-            spawnear_enemigos = true;
-        } 
-        if (casillas_quemadas > (TAMAÑO * TAMAÑO - 10)) {
-            velocidad_fuego *= 1.01;
-            velocidad_enemigo *= 1.01;
-            ratio_spawneo *= 1.01;
-        } else if (inventario.length !== 0){
+        if (inventario.length !== 0) {
             velocidad_fuego *= 0.99;
             velocidad_enemigo *= 0.99;
             ratio_spawneo *= 0.99;
@@ -886,15 +878,11 @@ function avanzar_tiempo() {
 
 function spawnear_enemigo() {
     setTimeout(() => {
-        if (casillas_quemadas >= TRES_CUARTOS) {
-            spawnear_enemigos = false;
-            return;
-        }
         if (vida <= 0) return;
         const LUGARES_DISPONIBLES = document.querySelectorAll(
             ".casilla:not(.fuego, .plasm_bullet):not([id]):not([class^='granada_lanzada'])"
         );
-        if (LUGARES_DISPONIBLES.length === 0) return;
+        if (LUGARES_DISPONIBLES.length === 0) return spawnear_enemigo();
         sumar_fuego();
         const NUM_RANDOM = Math.floor(Math.random() * (LUGARES_DISPONIBLES.length));
         const LUGAR_RANDOM = LUGARES_DISPONIBLES[NUM_RANDOM];
@@ -906,7 +894,7 @@ function spawnear_enemigo() {
         id_enemigo++;
         cargar();
         spawnear_enemigo();
-    }, ratio_spawneo)
+    }, ratio_spawneo);
 }
 
 //Función encargada de ver delante del enemigo
@@ -1047,34 +1035,35 @@ function dropear_objeto(ejex, ejey) {
 
     let nombre;
     let simbolo;
-    
+    let dropeado = false;
+
     if (NUMERO_RANDOM < (DROPS.plasm_canon + suerte) && !document.getElementById("id_plasm_canon")) {
         const CANTIDAD = objeto_plasm_canon?.cantidad ?? 0;
         if (CANTIDAD < MAX_PLASM_CANON) {
             nombre = "plasm_canon";
             simbolo = PLASM_CANON;
-        } else {
-            return;
+            dropeado = true;
+            console.log("plasm")
         }
     }
-    else if (NUMERO_RANDOM < (DROPS.granada + suerte)) {
+    if (NUMERO_RANDOM < (DROPS.granada + suerte) && !dropeado) {
         const NUM_GRANADAS = (document.querySelectorAll("#id_granada").length) * 5;
         const CANTIDAD = objeto_granada?.cantidad ?? 0;
         if (CANTIDAD + NUM_GRANADAS < MAX_GRANADAS) {
             nombre = "granada";
             simbolo = GRANADA;
-        } else {
-            return;
+            dropeado = true;
+            console.log("granada")
         }
     }
-    else if (NUMERO_RANDOM < (DROPS.vendas + suerte)) {
+    if (NUMERO_RANDOM < (DROPS.vendas + suerte) && !dropeado) {
         const NUM_VENDAS = document.querySelectorAll("#id_vendas").length;
         const CANTIDAD = objeto_vendas?.cantidad ?? 0;
         if (CANTIDAD + NUM_VENDAS < MAX_VENDAS) {
             nombre = "vendas";
             simbolo = VENDAS;
-        } else {
-            return;
+            dropeado = true;
+            console.log("vendas")
         }
     }
 
