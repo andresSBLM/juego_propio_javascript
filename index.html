@@ -12,6 +12,7 @@
         <div id="vida">
             <p>Vida:</p>
             <span id="barra_de_vida" class="barra3"></span>
+            <span id="barra_escudo" class="barra_escudo0"></span>
         </div>
         <div id="quemados">
             <p>Quemados:</p>
@@ -97,6 +98,7 @@
         const FOTOS_INVENTARIO = document.getElementsByClassName("foto");
         const SLOTS_INVENTARIO = document.getElementsByClassName("slot");
         const BARRA_DE_VIDA = document.getElementById("barra_de_vida");
+        const BARRA_ESCUDO = document.getElementById("barra_escudo");
         const TIEMPO = document.getElementById("tiempo");
         const ENEMIGOS = document.getElementById("numero_enemigos");
         const SUERTE = document.getElementById("cantidad_suerte");
@@ -117,11 +119,13 @@
             'pistola': '../img/pistola.avif',
             'vendas': '../img/venda.jpeg',
             'plasm_canon': '../img/plasm_canon.png',
-            'granada': '../img/granada.png'
+            'granada': '../img/granada.png',
+            'escudo': 'img/escudo.png'
         }
         var inventario = [];
         var equipado = "";
         var vida = 3;
+        var escudo = 0;
         var tiempo_de_juego = 0;
         var velocidad_fuego = 15000;
         var velocidad_spawn_fuego = 5;
@@ -156,10 +160,11 @@
         //PROBABILIDADES DROPS (1-100)
         const INCREMENTO_SUERTE = 0.1;
         var suerte = 0;
-        const DROPS = {"plasm_canon": 30, "vendas":10, "granada":5};
+        const DROPS = {"plasm_canon": 30, "vendas":10, "granada":5, "escudo": 10};
         const MAX_VENDAS = 10;
         const MAX_GRANADAS = 30;
         const MAX_PLASM_CANON = 20;
+        const MAX_ESCUDO = 3;
         const MAX_OBJETOS = 1;
 
         //FUNCIONES PARA EL INICIO DE LA PARTIDA

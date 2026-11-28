@@ -163,7 +163,7 @@ function verdelante(ejex, ejey) {
     switch (OBJETO) {
         case FUEGO:
             avanzar = false;
-            vida--;
+            comprobar_escudos(true);
             comprobar_vida();
             break;
         case PISTOLA:
@@ -221,6 +221,15 @@ function verdelante(ejex, ejey) {
                 inventario.push({ "nombre": 'granada', "ruta": objetos.granada, "cantidad": 5, "maximo": MAX_GRANADAS });
             }
             cargar_inventario();
+            break;
+        case ESCUDO:
+            avanzar = false;
+            escudo += 1;
+            ELEMENTO.removeAttribute("id");
+            ELEMENTO.classList.remove("barra_escudo0", "barra_escudo1", "barra_escudo2", "barra_escudo3");
+            partida[ejey][ejex] = TEXTO;
+            comprobar_escudos();
+            cargar();
             break;
         case BALA:
             avanzar = false;
@@ -546,6 +555,7 @@ function crear_bala() {
         case VENDAS:
         case PLASM_CANON:
         case GRANADA:
+        case ESCUDO:
             return;
     }
     partida[nuevo_array][nueva_posicion] = BALA;
@@ -660,6 +670,7 @@ function verdelante_bala(nuevo_ejex, nuevo_ejey, ejex, ejey) {
             case VENDAS:
             case PLASM_CANON:
             case GRANADA:
+            case ESCUDO:
                 partida[ejey].splice(ejex, 1, TEXTO);
                 cargar();
                 return false;
@@ -712,21 +723,17 @@ function esparcir_fuego() {
                                 case ENEMIGO:
                                     continue;
                                 case VENDAS:
+                                case PLASM_CANON:
+                                case ESCUDO:
                                     ELEMENTO.removeAttribute("id");
-                                    partida[ejey + y].splice(ejex + x, 1, TEXTO);
                                     break;
                                 case PLASM_BULLET:
                                     ELEMENTO.classList.remove("plasm_bullet1", "plasm_bullet2");
-                                    partida[ejey + y].splice(ejex + x, 1, TEXTO);
-                                    break;
-                                case PLASM_CANON:
-                                    ELEMENTO.removeAttribute("id");
                                     break;
                                 case GRANADA:
                                     ELEMENTO.removeAttribute("id");
                                     ELEMENTO.classList.remove("granada_lanzada1", "granada_lanzada2", "granada_lanzada3", "granada_lanzada4");
                                     break;
-
                             }
                             ELEMENTO.textContent = FUEGO;
                             ELEMENTO.dataset.visto = "visto";
@@ -740,7 +747,7 @@ function esparcir_fuego() {
             }
         }
         if (daño) {
-            vida--;
+            comprobar_escudos(true);
             comprobar_vida();
             daño = false;
         }
@@ -776,28 +783,26 @@ function cambiar_fondo() {
 
 function comprobar_vida() {
     BARRA_DE_VIDA.removeAttribute("class");
-    if (vida < 0) {
+    if (vida <= 0) {
         BARRA_DE_VIDA.classList.add("barra0");
+        setTimeout(() => {
+            alert("Has perdido");
+            window.location.href = "index.html";
+        }, 1000);
     }
-    switch (vida) {
-        case 3:
-            BARRA_DE_VIDA.classList.add("barra3");
-            break;
-        case 2:
-            BARRA_DE_VIDA.classList.add("barra2");
-            break;
-        case 1:
-            BARRA_DE_VIDA.classList.add("barra1");
-            break;
-        case 0:
-            BARRA_DE_VIDA.classList.add("barra0");
-            setTimeout(() => {
-                alert("Has perdido");
-                window.location.href = "index.html";
-            }, 1000);
-            break;
-    }
+    BARRA_DE_VIDA.classList.add("barra" + vida);       
 }
+
+//Funcion encargada de medir el nivel de los escudos segun pierda vida o gane escudos
+
+function comprobar_escudos(perdida) {
+    if (perdida) {
+        (escudo > 0) ? escudo-- : vida-- ;
+    }
+    BARRA_ESCUDO.removeAttribute("class");
+    BARRA_ESCUDO.classList.add("barra_escudo" + escudo);
+}
+
 
 //Funcion encargada de gestionar la victoria
 
@@ -908,9 +913,9 @@ function verdelante_enemigo(ejex, ejey) {
             return true;
         case PLASM_BULLET:
             sumar_fuego();
-            return true;
+            return false;
         case PROTA:
-            vida--;
+            comprobar_escudos(true);
             comprobar_vida();
             return false;
         case BALA:
@@ -1027,43 +1032,56 @@ function dropear_objeto(ejex, ejey) {
     enemigos_derrotados++;
     ENEMIGOS.textContent = enemigos_derrotados;
     const NUMERO_RANDOM = Math.floor(Math.random() * 101);
+    const NUMEROS_PROPIOS = {"plasm_canon":1, "granada":2, "vendas":3, "escudo": 4};
+    var numeros_posibles = [];
+    var numero_elegido;
     var objeto_plasm_canon = inventario.find(o => o.nombre == "plasm_canon");
     var objeto_vendas = inventario.find(o => o.nombre == "vendas");
     var objeto_granada = inventario.find(o => o.nombre == "granada");
     const ELEMENTO = conseguir_elemento(ejex, ejey);
     if (!ELEMENTO) return;
-
     let nombre;
     let simbolo;
-    let dropeado = false;
 
-    if (NUMERO_RANDOM < (DROPS.plasm_canon + suerte) && !document.getElementById("id_plasm_canon")) {
-        const CANTIDAD = objeto_plasm_canon?.cantidad ?? 0;
-        if (CANTIDAD < MAX_PLASM_CANON) {
-            nombre = "plasm_canon";
-            simbolo = PLASM_CANON;
-            dropeado = true;
-            console.log("plasm")
+    for (let [nombre,prob] of Object.entries(DROPS)) {
+        if ((parseInt(prob) + suerte) > NUMERO_RANDOM) {
+            numeros_posibles.push(NUMEROS_PROPIOS[nombre]);
         }
     }
-    if (NUMERO_RANDOM < (DROPS.granada + suerte) && !dropeado) {
+    const NUMERO_RANDOM_ELEGIDO = Math.floor(Math.random() * numeros_posibles.length);
+    numero_elegido = numeros_posibles[NUMERO_RANDOM_ELEGIDO];
+
+    if (numero_elegido == NUMEROS_PROPIOS.plasm_canon) {
+        const CANTIDAD = objeto_plasm_canon?.cantidad ?? 0;
+        if (CANTIDAD < MAX_PLASM_CANON && !document.getElementById("id_plasm_canon")) {
+            nombre = "plasm_canon";
+            simbolo = PLASM_CANON;
+        }
+    }
+    if (numero_elegido == NUMEROS_PROPIOS.granada) {
         const NUM_GRANADAS = (document.querySelectorAll("#id_granada").length) * 5;
         const CANTIDAD = objeto_granada?.cantidad ?? 0;
         if (CANTIDAD + NUM_GRANADAS < MAX_GRANADAS) {
             nombre = "granada";
             simbolo = GRANADA;
-            dropeado = true;
-            console.log("granada")
         }
     }
-    if (NUMERO_RANDOM < (DROPS.vendas + suerte) && !dropeado) {
+    if (numero_elegido == NUMEROS_PROPIOS.vendas) {
         const NUM_VENDAS = document.querySelectorAll("#id_vendas").length;
         const CANTIDAD = objeto_vendas?.cantidad ?? 0;
         if (CANTIDAD + NUM_VENDAS < MAX_VENDAS) {
             nombre = "vendas";
             simbolo = VENDAS;
-            dropeado = true;
-            console.log("vendas")
+        }
+    }
+
+    if (numero_elegido == NUMEROS_PROPIOS.escudo) {
+        if (escudo < 3) {
+            const NUM_ESCUDOS = document.querySelectorAll("#id_escudo").length;
+            if (escudo + NUM_ESCUDOS < MAX_ESCUDO) {
+            nombre = "escudo";
+            simbolo = ESCUDO;
+            }
         }
     }
 
@@ -1075,7 +1093,6 @@ function dropear_objeto(ejex, ejey) {
         return true;
     }
     return false;
-
 }
 
 //Funciones encargadas de gestionar las cuentas de las casillas quemadas y restantes
@@ -1381,6 +1398,8 @@ function abrir_ventana_probabilidades() {
         ventana_pulsada = false;
     }
 }
+
+//Funcion encargada de actualizar la ventana de probabilidades si esta abierta
 
 function actualizar_ventana_probabilidades() {
     const VENTANA = document.getElementById("probabilidad_objetos");

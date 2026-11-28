@@ -52,6 +52,36 @@
     text-shadow: 1px 1px 2px rgba(3, 3, 3, 0.797);
 }
 
+#id_escudo {
+    background-image: url(../img/escudo.png);
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+#barra_escudo {
+    width: 100%;
+    height: 20%;
+    border-radius: 10px;
+    box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.57);
+}
+
+.barra_escudo0 {
+    background:linear-gradient(90deg, rgb(167, 253, 241) 0 32%, white 32% 34%,rgb(167, 253, 241) 34% 66%, white 66% 68%, rgb(167, 253, 241) 68% 100%);
+}
+
+.barra_escudo1 {
+    background:linear-gradient(90deg, rgb(167, 253, 241) 0 32%, white 32% 34%,rgb(167, 253, 241) 34% 66%, white 66% 68%, blue 68% 100%);
+}
+
+.barra_escudo2 {
+    background:linear-gradient(90deg, rgb(167, 253, 241) 0 32%, white 32% 34%,blue 34% 66%, white 66% 68%, blue 68% 100%);
+}
+
+.barra_escudo3 {
+    background:linear-gradient(90deg, blue 0 32%, white 32% 34%,blue 34% 66%, white 66% 68%, blue 68% 100%);
+}
+
 #barra_de_vida {
     width: 100%;
     height: 20%;
@@ -191,8 +221,8 @@
 .cantidad {
     font-weight: bold;
     position: absolute;
-    bottom: 5px;
-    right: 5px;
+    bottom: 2px;
+    right: 2px;
     font-size: calc(var(--lado * 0.04));
     color: rgb(46, 90, 10);
     text-shadow: 1px 1px 1px rgb(13, 255, 0);
