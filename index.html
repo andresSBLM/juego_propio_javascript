@@ -127,15 +127,28 @@
         var vida = 3;
         var escudo = 0;
         var tiempo_de_juego = 0;
-        var velocidad_fuego = 15000;
-        var velocidad_spawn_fuego = 5;
+        var velocidad_fuego;
+        var velocidad_spawn_fuego;
+        var el_fuego_crece = true;
         var ventana_pulsada = false;
+
+        //MODOS DE DIFICULTAD
+        const FACIL = {"velocidad_fuego": 25000, "velocidad_spawn_fuego": 5, "velocidad_enemigo":5000, "ratio_spawneo": 5000, "incremento_suerte": 0.1};
+        const NORMAL = {"velocidad_fuego": 18000, "velocidad_spawn_fuego": 4, "velocidad_enemigo":3000, "ratio_spawneo": 3000, "incremento_suerte": 0.5};
+        const DIFICIL = {"velocidad_fuego": 10000, "velocidad_spawn_fuego": 2, "velocidad_enemigo":2000, "ratio_spawneo": 2000, "incremento_suerte": 1};
+        const IMPOSIBLE = {"velocidad_fuego": 5000, "velocidad_spawn_fuego": 1, "velocidad_enemigo":1000, "ratio_spawneo": 1000,"incremento_suerte": 2};
+        const RATIO_AUMENTO_DIFICULTAD = 3;
+        
+        //VARIABLES 1º FASE
+        const TIEMPO_FASE1 = 10;
+        var fase_actual = 0;
 
         //VARIABLES DE LOS ENEMIGOS 
         var id_enemigo = 1;
-        var velocidad_enemigo = 5000;
-        var ratio_spawneo = 5000;
+        var velocidad_enemigo;
+        var ratio_spawneo;
         var enemigos_derrotados = 0;
+        var aparecen_enemigos = true;
 
         //VARIABLES DE LA PISTOLA
         const VELOCIDAD_BALA = 25;
@@ -158,9 +171,9 @@
         var player_position;
 
         //PROBABILIDADES DROPS (1-100)
-        const INCREMENTO_SUERTE = 0.1;
+        var incremento_suerte;
         var suerte = 0;
-        const DROPS = {"plasm_canon": 30, "vendas":10, "granada":5, "escudo": 10};
+        const DROPS = {"plasm_canon": 1, "vendas":10, "granada":5, "escudo": 10};
         const MAX_VENDAS = 10;
         const MAX_GRANADAS = 30;
         const MAX_PLASM_CANON = 20;
@@ -168,6 +181,7 @@
         const MAX_OBJETOS = 1;
 
         //FUNCIONES PARA EL INICIO DE LA PARTIDA
+        cargar_dificultad(IMPOSIBLE);
         SUERTE.textContent = suerte;
         const CONTENEDOR = document.getElementById("contenedor_principal");
         CONTENEDOR.style.gridTemplateColumns = `repeat(${TAMAÑO}, minmax(0, 1fr))`;

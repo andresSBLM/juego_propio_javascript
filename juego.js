@@ -62,6 +62,16 @@ function cargar() {
     }
 }
 
+//Función encargada de asignar los valores de dificultad según el modo
+
+function cargar_dificultad(modo) {
+    velocidad_fuego = modo.velocidad_fuego;
+    velocidad_enemigo = modo.velocidad_enemigo;
+    ratio_spawneo = modo.ratio_spawneo;
+    velocidad_spawn_fuego = modo.velocidad_spawn_fuego;
+    incremento_suerte = modo.incremento_suerte;
+}
+
 //Funcion que inserta al jugador en mitad del tablero
 
 function insertar_jugador() {
@@ -690,6 +700,7 @@ function verdelante_bala(nuevo_ejex, nuevo_ejey, ejex, ejey) {
 //Función encargada de esparcir el incendio
 
 function esparcir_fuego() {
+    if (!el_fuego_crece) return;
     setTimeout(() => {
         var daño = false;
         const ELEMENTOS = document.getElementsByClassName("fuego");
@@ -757,6 +768,26 @@ function esparcir_fuego() {
     }, velocidad_fuego);
 }
 
+//Función encargada de apagar el fuego de todo el tablero
+
+function apagar_fuego() {
+    const ELEMENTOS_FUEGO = [...document.querySelectorAll(".fuego")];
+    for (let x = 0; x < ELEMENTOS_FUEGO.length; x++) {
+        setTimeout(() => {
+            const ELEMENTO_RANDOM = Math.floor(Math.random() * ELEMENTOS_FUEGO.length);
+            const FUEGO = ELEMENTOS_FUEGO[ELEMENTO_RANDOM];
+            ELEMENTOS_FUEGO.splice(ELEMENTO_RANDOM, 1);
+            const EJEX = FUEGO.dataset.ejex;
+            const EJEY = FUEGO.dataset.ejey;
+            FUEGO.classList.remove("fuego");
+            FUEGO.removeAttribute("data-visto");
+            partida[EJEY][EJEX] = TEXTO;
+            restar_fuego();
+            cargar();
+        }, 10 * x)
+    }
+}
+
 //Funcion encargada de cambiar el fondo segun el estado de las casillas
 
 function cambiar_fondo() {
@@ -790,14 +821,14 @@ function comprobar_vida() {
             window.location.href = "index.html";
         }, 1000);
     }
-    BARRA_DE_VIDA.classList.add("barra" + vida);       
+    BARRA_DE_VIDA.classList.add("barra" + vida);
 }
 
 //Funcion encargada de medir el nivel de los escudos segun pierda vida o gane escudos
 
 function comprobar_escudos(perdida) {
     if (perdida) {
-        (escudo > 0) ? escudo-- : vida-- ;
+        (escudo > 0) ? escudo-- : vida--;
     }
     BARRA_ESCUDO.removeAttribute("class");
     BARRA_ESCUDO.classList.add("barra_escudo" + escudo);
@@ -867,13 +898,21 @@ function avanzar_tiempo() {
     setTimeout(() => {
         tiempo_de_juego++;
         TIEMPO.textContent = tiempo_de_juego;
-        if (tiempo_de_juego % velocidad_spawn_fuego == 0 && inventario.length !== 0) {
+        if (tiempo_de_juego % velocidad_spawn_fuego === 0 && inventario.length !== 0 && el_fuego_crece) {
             for (let x = 0; x <= 5; x++)spawnear_fuego();
         }
-        if (inventario.length !== 0) {
+        if (tiempo_de_juego % RATIO_AUMENTO_DIFICULTAD === 0 && inventario.length !== 0) {
             velocidad_fuego *= 0.99;
             velocidad_enemigo *= 0.99;
             ratio_spawneo *= 0.99;
+        }
+        if (tiempo_de_juego >= TIEMPO_FASE1 && fase_actual === 0) {
+            aparecen_enemigos = false;
+            el_fuego_crece = false;
+            if (!document.querySelector("[id^=enemigo]:not([id^=enemigos])")) {
+                fase_actual++;
+                apagar_fuego();
+            }
         }
         avanzar_tiempo();
     }, 1000);
@@ -883,7 +922,7 @@ function avanzar_tiempo() {
 
 function spawnear_enemigo() {
     setTimeout(() => {
-        if (vida <= 0) return;
+        if (vida <= 0 || !aparecen_enemigos) return;
         const LUGARES_DISPONIBLES = document.querySelectorAll(
             ".casilla:not(.fuego, .plasm_bullet):not([id]):not([class^='granada_lanzada'])"
         );
@@ -1026,13 +1065,13 @@ function mover_enemigo(id) {
 //Funcion encargada de gestionar los dropeos de los enemigos
 
 function dropear_objeto(ejex, ejey) {
-    suerte += INCREMENTO_SUERTE;
+    suerte += incremento_suerte;
     SUERTE.textContent = suerte.toFixed(2);
     actualizar_ventana_probabilidades();
     enemigos_derrotados++;
     ENEMIGOS.textContent = enemigos_derrotados;
     const NUMERO_RANDOM = Math.floor(Math.random() * 101);
-    const NUMEROS_PROPIOS = {"plasm_canon":1, "granada":2, "vendas":3, "escudo": 4};
+    const NUMEROS_PROPIOS = { "plasm_canon": 1, "granada": 2, "vendas": 3, "escudo": 4 };
     var numeros_posibles = [];
     var numero_elegido;
     var objeto_plasm_canon = inventario.find(o => o.nombre == "plasm_canon");
@@ -1043,7 +1082,7 @@ function dropear_objeto(ejex, ejey) {
     let nombre;
     let simbolo;
 
-    for (let [nombre,prob] of Object.entries(DROPS)) {
+    for (let [nombre, prob] of Object.entries(DROPS)) {
         if ((parseInt(prob) + suerte) > NUMERO_RANDOM) {
             numeros_posibles.push(NUMEROS_PROPIOS[nombre]);
         }
@@ -1079,8 +1118,8 @@ function dropear_objeto(ejex, ejey) {
         if (escudo < 3) {
             const NUM_ESCUDOS = document.querySelectorAll("#id_escudo").length;
             if (escudo + NUM_ESCUDOS < MAX_ESCUDO) {
-            nombre = "escudo";
-            simbolo = ESCUDO;
+                nombre = "escudo";
+                simbolo = ESCUDO;
             }
         }
     }
@@ -1110,7 +1149,6 @@ function restar_fuego() {
     casillas_restantes++;
     CASILLAS_QUEMADAS.textContent = casillas_quemadas;
     CASILLAS_RESTANTES.textContent = casillas_restantes;
-    victoria();
 }
 
 //Funcion que obtiene un elemento del DOM o null si no existe
